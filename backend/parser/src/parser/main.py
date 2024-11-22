@@ -6,20 +6,19 @@ from pypdf import PdfReader
 from parser import util
 
 PAGE_NUM = r"Стр\.\s*\d+\s*из\s*\d+"
-SPORT_KIND = r"([А-Я\s]+)Основной\s+состав\s"
+SPORT_KIND = r"([А-Я\-\s]+)Основной\s+состав\s"
 RESERVE_SECTION = r"Молодежный\s+\(резервный\)\s+состав"
 ID = r"\d{10,}"
 ROW_START = rf"\s(?={ID}\s)"
 COMPETITORS_NUMBER = r"\s+(?=\d+$)"
 COMPETITION_TITLE_BEFORE = r"\s+"
-LOWERCASE_RUS = r"[а-я]"
-COMPETITION_TITLE_AFTER = rf"(?=\s+{LOWERCASE_RUS})"
+COMPETITION_TITLE_AFTER = r"(?=\s+[а-я])"
 DATE = r"\d{2}\.\d{2}\.\d{4}"
 DATES_BEFORE = rf"\s(?={DATE}\s{DATE})"
 DATES_AFTER = rf"(?<={DATE}\s{DATE})\s"
 UPPERCASE_RUS = r"[А-Я]"
-DISCIPLINE_BEFORE = rf"\s?(?={UPPERCASE_RUS}|$)"
-CITY_BEFORE = r"(?:,\s)|$"
+DISCIPLINE_BEFORE = r"\s?(?=[А-Я]|$)"
+REGION_NAME = r"([^,]+),\s+"
 
 
 def remove_page_numbers(s: str) -> str:
@@ -111,39 +110,43 @@ def country(df: pd.DataFrame) -> pd.DataFrame:
     df = util.flat_apply(
         df,
         "Raw Place",
-        lambda s: re.split("\n+", s, maxsplit=1),
+        lambda s: re.split(r"\n+", s, maxsplit=1),
         columns=["Country", "Raw Region"],
     )
+    df = df.dropna()
     df["Country"] = df["Country"].apply(lambda s: re.sub(r"\s+", " ", s))
     return df
 
 
-def region(df: pd.DataFrame) -> pd.DataFrame:
-    df = util.flat_apply(
-        df,
-        "Raw Region",
-        lambda s: re.split(CITY_BEFORE, s, maxsplit=1),
-        columns=["Region", "City"],
-    )
-    df["Region"] = df["Region"].apply(lambda s: re.sub(r"\s+", " ", s))
+def parse_region(s: str) -> list[list[str]]:
+    lines = filter(lambda x: x != "", map(str.strip, re.split(r"\n+", s)))
 
-    df["City Copy"] = df["City"].copy()
-    df["City"] = df.apply(
-        lambda row: row["Region"] if row["City"] == "" else row["City"],
-        axis=1,
-    )
-    df["Region"] = df.apply(
-        lambda row: "" if row["City Copy"] == "" else row["Region"],
-        axis=1,
-    )
-    df = df.drop("City Copy", axis=1)
+    res = []
+    for line in lines:
+        parts = list(
+            filter(lambda x: x != "", re.split(REGION_NAME, line, maxsplit=1))
+        )
+        if len(parts) == 0:
+            res.append(["", line])
+        elif len(parts) == 1:
+            res.append(["", parts[0]])
+        elif len(parts) == 2:
+            res.append(parts)
+        else:
+            res.append(parts[:2])
+
+    return res
+
+
+def locality(df: pd.DataFrame) -> pd.DataFrame:
+    df["Locality"] = df["Raw Region"].apply(parse_region)
+    df = df.drop("Raw Region", axis=1)
     return df
 
 
 def main():
     reader = PdfReader("input.pdf")
-    # pages = reader.pages[86:95]
-    pages = reader.pages[:50]
+    pages = reader.pages
 
     res = "\n".join(page.extract_text() for page in pages)
     pipeline = [
@@ -164,16 +167,10 @@ def main():
         dates,
         group,
         country,
-        # region,
+        locality,
     ]
     for key in sports:
         res = sports[key]
         for step in pipeline:
             res = step(res)
         parsed_sports[key] = res
-
-    for key in parsed_sports:
-        df = parsed_sports[key]
-        print(key)
-        print(df.head())
-        print()
