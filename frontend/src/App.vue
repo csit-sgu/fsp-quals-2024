@@ -16,7 +16,7 @@ import { ref } from 'vue'
 import { sports } from '@/lib/dataSource'
 
 const pickedSport = ref('')
-const updateSport = (newValue: string) => pickedSport.value = newValue
+const updateSport = (newValue: string) => (pickedSport.value = newValue)
 </script>
 
 <template>
@@ -32,15 +32,16 @@ const updateSport = (newValue: string) => pickedSport.value = newValue
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-    <SidebarInset class="min-h-screen">
+    <SidebarInset class="min-h-screen flex flex-col">
       <header
-        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+      >
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
-      <WeeklyView />
+      <WeeklyView class="min-w-full" />
     </SidebarInset>
   </SidebarProvider>
 </template>

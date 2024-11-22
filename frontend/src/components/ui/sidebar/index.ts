@@ -23,7 +23,6 @@ export { default as SidebarProvider } from './SidebarProvider.vue'
 export { default as SidebarRail } from './SidebarRail.vue'
 export { default as SidebarSeparator } from './SidebarSeparator.vue'
 export { default as SidebarTrigger } from './SidebarTrigger.vue'
-export { default as SidebarBuffer } from './SidebarBuffer.vue'
 
 export { useSidebar } from './utils'
 
