@@ -30,9 +30,8 @@ const updateSport = (newValue: string) => (pickedSport.value = newValue)
           <Chooser :options="sports" default-msg="Любой вид спорта" @update="updateSport" />
         </SidebarGroup>
       </SidebarContent>
-      <SidebarRail />
     </Sidebar>
-    <SidebarInset class="min-h-screen flex flex-col">
+    <SidebarInset class="min-h-screen overflow-x-hidden">
       <header
         class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
       >
@@ -41,7 +40,7 @@ const updateSport = (newValue: string) => (pickedSport.value = newValue)
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
-      <WeeklyView class="min-w-full" />
+      <WeeklyView />
     </SidebarInset>
   </SidebarProvider>
 </template>
