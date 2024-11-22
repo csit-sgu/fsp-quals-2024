@@ -7,13 +7,15 @@ import {
   SidebarGroupLabel,
   SidebarInset,
   SidebarProvider,
-  SidebarRail,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { WeeklyView, DateFilterPicker, Chooser } from '@/components/ui'
 import { ref } from 'vue'
 
 import { sports, countries, getRegions, getLocalities } from '@/lib/dataSource'
+
+const viewMode = ref('')
+const updateViewMode = (newValue: string) => (viewMode.value = newValue)
 
 const pickedSport = ref('')
 const updateSport = (newValue: string) => (pickedSport.value = newValue)
@@ -24,6 +26,8 @@ const pickedCountryRegions = ref([])
 const updateCountry = async (newValue: string) => {
   pickedCountry.value = newValue
   pickedCountryRegions.value = await getRegions(newValue)
+  pickedRegion.value = ''
+  pickedLocality.value = ''
 }
 
 const pickedRegion = ref('')
@@ -32,6 +36,7 @@ const pickedRegionLocalities = ref([])
 const updateRegion = async (newValue: string) => {
   pickedRegion.value = newValue
   pickedRegionLocalities.value = await getLocalities(pickedCountry.value, newValue)
+  pickedLocality.value = ''
 }
 
 const pickedLocality = ref('')
@@ -44,7 +49,7 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
       <SidebarContent>
         <SidebarGroup class="content-center px-4 w-auto">
           <SidebarGroupLabel class="pt-4 pb-6">Фильтрация по дате</SidebarGroupLabel>
-          <DateFilterPicker />
+          <DateFilterPicker @update="updateViewMode" />
           <SidebarGroupLabel class="pt-8 pb-6">Фитрация по соревнованиям</SidebarGroupLabel>
           <Chooser :options="sports" default-msg="Любой вид спорта" @update="updateSport" />
           <SidebarGroupLabel class="pt-8 pb-6">Фитрация по месту проведения</SidebarGroupLabel>
@@ -66,7 +71,7 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
-      <WeeklyView />
+      <WeeklyView v-if="!viewMode || viewMode == 'Ближайшая неделя'" />
     </SidebarInset>
   </SidebarProvider>
 </template>

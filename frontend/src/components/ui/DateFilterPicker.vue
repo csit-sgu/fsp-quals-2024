@@ -13,6 +13,10 @@ const options = [
   'Указать вручную',
 ]
 
+const emit = defineEmits<{
+  (e: 'update', value: string): void
+}>()
+
 const value = ref('')
 
 const today = new Date();
@@ -31,6 +35,7 @@ const calendarUpdated = (range: DateRange) => {
 
 const update = (newValue: string) => {
   value.value = newValue
+  emit('update', newValue)
 };
 </script>
 

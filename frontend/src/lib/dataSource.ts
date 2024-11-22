@@ -9,7 +9,10 @@ export const sports = [
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? "localhost:3000"
 
-export const countries = await axios.get(BACKEND_URL + '/countries').then(res => res.data)
+export let countries = await axios.get(BACKEND_URL + '/countries').then(res => res.data)
+if (!Array.isArray(countries)) {
+  countries = []
+}
 
 export async function getRegions(country: string) {
   return await axios.get(BACKEND_URL + '/regions', { params: { country } }).then(res => res.data)
