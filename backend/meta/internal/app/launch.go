@@ -64,7 +64,7 @@ func Launch() {
 		v1Group.GET("/countries", v1.GetCountries)
 		v1Group.GET("/regions", v1.GetRegion)
 		v1Group.GET("/localities", v1.GetLocalities)
-        v1Group.GET("/sports", v1.GetSports)
+		v1Group.GET("/sports", v1.GetSports)
 	}
 
 	if config.C.EnablePprof {

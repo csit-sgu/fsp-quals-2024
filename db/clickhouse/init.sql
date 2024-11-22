@@ -104,15 +104,15 @@ VALUES
     ('100016', 'Мексика', 'Халиско', 'г. Гвадалахара');
 
 
-CREATE VIEW db.general_view
+CREATE view db.general_view
 AS
-SELECT
-	e.code as code, start_date, country, region, title, additional_info, n_participants, stage, end_date
+select
+	e.code as code, start_date, country, region, title, additional_info, n_participants, stage, end_date, sport, left_bound, right_bound, gender, locality, extra_mapping
 FROM
     db.events AS e
-INNER JOIN
+left JOIN
     db.location_restrictions AS l
 ON e.code = l.code
-INNER JOIN
+left JOIN
     db.age_restrictions AS a
 ON e.code = a.code

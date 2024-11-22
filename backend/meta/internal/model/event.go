@@ -2,16 +2,43 @@ package model
 
 import "time"
 
-type Event struct {
+type LocationData struct {
+	Country  string `json:"country" ch:"country"`
+	Region   string `json:"region"  ch:"region"`
+	Locality string `json:"locality"    ch:"locality"`
+}
+
+type AgeData struct {
+	Gender     string `json:"gender"      ch:"gender"`
+	LeftBound  uint32 `json:"left_bound"  ch:"left_bound"`
+	RightBound uint32 `json:"right_bound" ch:"right_bound"`
+	Original   string `json:"original"    ch:"extra_mapping"`
+}
+
+type EventView struct {
 	Code           string    `json:"code"            ch:"code"`
-	Gender         string    `json:"gender"          ch:"gender"`
-	Sport          string    `json:"sport"           ch:"sport"`
-	AdditionalInfo string    `json:"additional_info" ch:"additional_info"`
+	StartDate      time.Time `json:"start_date"      ch:"start_date"`
 	Country        string    `json:"country"         ch:"country"`
 	Region         string    `json:"region"          ch:"region"`
 	Locality       string    `json:"locality"        ch:"locality"`
-	Stage          string    `json:"stage"           ch:"stage"`
-	StartDate      time.Time `json:"start_date"      ch:"start_date"`
-	EndDate        time.Time `json:"end_date"        ch:"end_date"`
+	Title          string    `json:"title"           ch:"title"`
+	AdditionalInfo string    `json:"additional_info" ch:"additional_info"`
 	Participants   uint32    `json:"n_participants"  ch:"n_participants"`
+	Stage          string    `json:"stage"           ch:"stage"`
+	EndDate        time.Time `json:"end_date"        ch:"end_date"`
+	Sport          string    `json:"sport"           ch:"sport"`
+	ExtraMapping   string    `json:"extra_mapping"   ch:"extra_mapping"`
+}
+
+type Event struct {
+	Code           string         `json:"code"            ch:"code"`
+	StartDate      time.Time      `json:"start_date"      ch:"start_date"`
+	LocationData   []LocationData `json:"location_data"   ch:"location_data"`
+	AgeData        []AgeData      `json:"age_data"        ch:"age_data"`
+	Title          string         `json:"title"           ch:"title"`
+	AdditionalInfo string         `json:"additional_info" ch:"additional_info"`
+	Participants   uint32         `json:"n_participants"  ch:"n_participants"`
+	Stage          string         `json:"stage"           ch:"stage"`
+	EndDate        time.Time      `json:"end_date"        ch:"end_date"`
+	Sport          string         `json:"sport"           ch:"sport"`
 }

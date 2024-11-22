@@ -15,8 +15,8 @@ type FilterCondition struct {
 	Sport          string    `json:"sport"           filter:"common"   ch:"sport"`
 	AdditionalInfo string    `json:"additional_info" filter:"fuzzy"    ch:"additional_info"`
 	Country        string    `json:"country"         filter:"common"   ch:"country"`
-	Region         string    `json:"region"          filter:"join"     ch:"region"`
-	City           string    `json:"city"            filter:"join"     ch:"city"`
+	Region         string    `json:"region"          filter:"common"   ch:"region"`
+	City           string    `json:"city"            filter:"common"   ch:"city"`
 	Stage          string    `json:"stage"           filter:"common"   ch:"stage"`
 	DateRange      DateRange `json:"date_range"      filter:"interval" ch:"start_date"`
 }

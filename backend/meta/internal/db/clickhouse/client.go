@@ -58,11 +58,11 @@ func (c ClickhouseClient) buildCondition(
 			), []any{
 				driver.NamedValue{
 					Name:  key + "_from",
-					Value: fieldValue.FieldByName("From"),
+					Value: fieldValue.FieldByName("From").Interface(),
 				},
 				driver.NamedValue{
 					Name:  key + "_to",
-					Value: fieldValue.FieldByName("To"),
+					Value: fieldValue.FieldByName("To").Interface(),
 				},
 			}
 	default:
@@ -80,6 +80,9 @@ func (c ClickhouseClient) extractWhereParts(
 		if !v.Field(i).IsZero() {
 			fieldType := t.Field(i).Tag.Get("filter")
 			part, newFields := c.buildCondition(key, v.Field(i), fieldType)
+			if part == "" {
+				continue
+			}
 			log.S.Debug("Condition part", log.L().Add("part", part))
 			if part != "" {
 				parts = append(parts, part)
@@ -116,7 +119,7 @@ func (c ClickhouseClient) BuildFilterQuery(
 	}
 
 	query = "SELECT " + fieldPart + " " + "FROM db.events" + " " + whereClause + ";"
-	// log.S.Debug("Built filter query", log.L().Add("query", query))
+	log.S.Debug("Built filter query", log.L().Add("query", query))
 
 	return query, namedFields
 }
@@ -129,7 +132,8 @@ func (c ClickhouseClient) FilterEvents(
 ) (events []model.Event, err error) {
 	query, namedFields := c.BuildFilterQuery(cond, fields)
 
-	if err = c.conn.Select(ctx, &events, query, namedFields...); err != nil {
+	var eventViews []model.EventView
+	if err = c.conn.Select(ctx, &eventViews, query, namedFields...); err != nil {
 		log.S.Error(
 			"Failed to execute filter query",
 			log.L().Add("query", query).Add("error", err),
@@ -139,7 +143,62 @@ func (c ClickhouseClient) FilterEvents(
 		log.S.Debug("Events were retrived successfully", l.Add("count", len(events)))
 	}
 
+	for i := range eventViews {
+		locationData, err := c.getLocationData(ctx, eventViews[i].Code)
+		if err != nil {
+			log.S.Warn("Failed to get location data", log.L().Add("error", err))
+			return nil, err
+		}
+		ageData, err := c.getAgeData(ctx, eventViews[i].Code)
+		if err != nil {
+			log.S.Warn("Failed to get age data", log.L().Add("error", err))
+			return nil, err
+		}
+		events = append(events, model.Event{
+			Code:           eventViews[i].Code,
+			StartDate:      eventViews[i].StartDate,
+			LocationData:   locationData,
+			AgeData:        ageData,
+			Title:          eventViews[i].Title,
+			AdditionalInfo: eventViews[i].AdditionalInfo,
+			Participants:   eventViews[i].Participants,
+			Stage:          eventViews[i].Stage,
+			EndDate:        eventViews[i].EndDate,
+			Sport:          eventViews[i].Sport,
+		})
+	}
+
 	return events, nil
+}
+
+func (c ClickhouseClient) getAgeData(
+	ctx context.Context,
+	code string,
+) (ageData []model.AgeData, err error) {
+	if err := c.conn.Select(ctx, &ageData, ageQuery, clickhouse.Named("code", code)); err != nil {
+		log.S.Error(
+			"Failed to execute age query",
+			log.L().Add("query", ageQuery).Add("error", err),
+		)
+		return nil, err
+	}
+
+	return ageData, nil
+}
+
+func (c ClickhouseClient) getLocationData(
+	ctx context.Context,
+	code string,
+) (locationData []model.LocationData, err error) {
+	if err := c.conn.Select(ctx, &locationData, locationQuery, clickhouse.Named("code", code)); err != nil {
+		log.S.Error(
+			"Failed to execute age query",
+			log.L().Add("query", locationQuery).Add("error", err),
+		)
+		return nil, err
+	}
+
+	return locationData, nil
 }
 
 func (c *ClickhouseClient) GetCountries(
