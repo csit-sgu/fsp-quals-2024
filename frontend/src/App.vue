@@ -51,15 +51,16 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
           <SidebarGroupLabel class="pt-4 pb-6">Фильтрация по дате</SidebarGroupLabel>
           <DateFilterPicker @update="updateViewMode" />
           <SidebarGroupLabel class="pt-8 pb-6">Фитрация по соревнованиям</SidebarGroupLabel>
-          <Chooser :options="sports" default-msg="Любой вид спорта" @update="updateSport" />
+          <Chooser :options="sports" :show-search="true" default-msg="Любой вид спорта" @update="updateSport" />
           <SidebarGroupLabel class="pt-8 pb-6">Фитрация по месту проведения</SidebarGroupLabel>
-          <Chooser :options="countries" default-msg="Любая страна" @update="updateCountry" />
+          <Chooser :options="countries" :show-search="true" default-msg="Любая страна" @update="updateCountry" />
           <div v-if="pickedCountry == 'Россия'" class="pb-2" />
-          <Chooser v-if="pickedCountry == 'Россия'" :options="pickedCountryRegions" default-msg="Любой регион"
-            @update="updateRegion" />
+          <Chooser v-if="pickedCountry == 'Россия'" :show-search="true" :options="pickedCountryRegions"
+            default-msg="Любой регион" @update="updateRegion" />
           <div class="pt-2" />
           <Chooser v-if="pickedRegion.length > 0 || (pickedCountry != 'Россия' && pickedCountry.length > 0)"
-            :options="pickedRegionLocalities" default-msg="Любой населённый пункт" @update="updateLocality" />
+            :show-search="true" :options="pickedRegionLocalities" default-msg="Любой населённый пункт"
+            @update="updateLocality" />
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>

@@ -4,6 +4,8 @@ import {
   Command,
   CommandGroup,
   CommandItem,
+  CommandEmpty,
+  CommandInput,
   CommandList,
 } from '@/components/ui/command'
 import {
@@ -18,6 +20,7 @@ import { ref } from 'vue'
 type Props = {
   options: string[],
   defaultMsg: string,
+  showSearch?: boolean,
 }
 
 const props = defineProps<Props>()
@@ -40,6 +43,8 @@ const open = ref(false)
     </PopoverTrigger>
     <PopoverContent class="w-[250px] p-0">
       <Command>
+        <CommandInput v-if="showSearch" class="h-9" placeholder="Поиск..." />
+        <CommandEmpty v-if="showSearch">Ничего не найдено.</CommandEmpty>
         <CommandList>
           <CommandGroup>
             <CommandItem v-for="option in props.options" :key="option" :value="option" @select="(ev) => {
