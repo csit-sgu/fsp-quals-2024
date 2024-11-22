@@ -1,9 +1,5 @@
-<script setup lang=ts>
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+<script setup lang="ts">
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Separator } from '@/components/ui/separator'
 import {
   Sidebar,
@@ -20,6 +16,7 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
+  SidebarBuffer,
 } from '@/components/ui/sidebar'
 import {
   BookOpen,
@@ -31,6 +28,8 @@ import {
   Settings2,
   SquareTerminal,
 } from 'lucide-vue-next'
+import type { Button } from '@/components/ui/button'
+import WeeklyView from '@/components/ui/WeeklyView.vue'
 
 import { ref, type Ref } from 'vue'
 import { CalendarDate, type DateValue } from '@internationalized/date'
@@ -150,19 +149,19 @@ const data = {
   ],
 }
 
-const today = new Date();
-const startDate = new CalendarDate(today.getFullYear(), today.getMonth(), today.getDay());
+const today = new Date()
+const startDate = new CalendarDate(today.getFullYear(), today.getMonth(), today.getDay())
 const calendarPickedRange = ref({
   start: startDate,
   end: startDate.add({ days: 20 }),
-}) as Ref<DateRange>;
+}) as Ref<DateRange>
 
 const calendarUpdated = (range: DateRange) => {
   if (!range.start || !range.end) {
-    return;
+    return
   }
-  console.log(range.start, range.end);
-};
+  console.log(range.start, range.end)
+}
 </script>
 
 <template>
@@ -170,18 +169,28 @@ const calendarUpdated = (range: DateRange) => {
     <Sidebar collapsible="icon">
       <SidebarContent>
         <SidebarGroup class="content-center p-0 w-auto">
-          <RangeCalendar v-model="calendarPickedRange" initial-focus @update:modelValue="calendarUpdated" />
+          <RangeCalendar
+            v-model="calendarPickedRange"
+            initial-focus
+            @update:modelValue="calendarUpdated"
+          />
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>
-            <Collapsible v-for="item in data.navMain" :key="item.title" as-child :default-open="item.isActive"
-              class="group/collapsible">
+            <Collapsible
+              v-for="item in data.navMain"
+              :key="item.title"
+              as-child
+              :default-open="item.isActive"
+              class="group/collapsible"
+            >
               <SidebarMenuItem>
                 <CollapsibleTrigger as-child>
                   <SidebarMenuButton :tooltip="item.title">
                     <component :is="item.icon" />
                     <span>{{ item.title }}</span>
                     <ChevronRight
-                      class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                    />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -202,22 +211,16 @@ const calendarUpdated = (range: DateRange) => {
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
-    <SidebarInset>
+    <SidebarInset class="min-h-screen">
       <header
-        class="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+      >
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
-      <div class="flex flex-1 flex-col gap-4 p-4 pt-0">
-        <div class="grid auto-rows-min gap-4 md:grid-cols-3">
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-          <div class="aspect-video rounded-xl bg-muted/50" />
-        </div>
-        <div class="min-h-[100vh] flex-1 rounded-xl bg-muted/50 md:min-h-min" />
-      </div>
+      <WeeklyView />
     </SidebarInset>
   </SidebarProvider>
 </template>
