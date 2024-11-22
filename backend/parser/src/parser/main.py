@@ -17,6 +17,7 @@ DATES_BEFORE = rf"\n(?={DATE}\n{DATE})"
 DATES_AFTER = rf"(?<={DATE}\n{DATE})\n"
 UPPERCASE_RUS = r"[А-Я]"
 DISCIPLINE_BEFORE = rf"\n?(?={UPPERCASE_RUS}|$)"
+REGION_AFTER = r"(?:,\s)|$"
 
 
 def remove_page_numbers(s: str) -> str:
@@ -103,9 +104,18 @@ def country(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def region(df: pd.DataFrame) -> pd.DataFrame:
+    return util.flat_apply(
+        df,
+        "Raw Region",
+        lambda s: re.split(REGION_AFTER, s, maxsplit=1),
+        columns=["Region", "City"],
+    )
+
+
 def main():
     reader = PdfReader("input.pdf")
-    page = reader.pages[111]
+    page = reader.pages[159]
 
     res = page.extract_text()
     pipeline = [
@@ -116,6 +126,7 @@ def main():
         dates,
         group,
         country,
+        region,
     ]
     for step in pipeline:
         res = step(res)
