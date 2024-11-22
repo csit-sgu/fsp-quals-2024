@@ -32,6 +32,11 @@ import {
   SquareTerminal,
 } from 'lucide-vue-next'
 
+import { ref, type Ref } from 'vue'
+import { CalendarDate, type DateValue } from '@internationalized/date'
+import { RangeCalendar } from '@/components/ui/range-calendar'
+import type { DateRange } from 'radix-vue'
+
 // This is sample data.
 const data = {
   user: {
@@ -144,13 +149,28 @@ const data = {
     },
   ],
 }
+
+const today = new Date();
+const startDate = new CalendarDate(today.getFullYear(), today.getMonth(), today.getDay());
+const calendarPickedRange = ref({
+  start: startDate,
+  end: startDate.add({ days: 20 }),
+}) as Ref<DateRange>;
+
+const calendarUpdated = (range: DateRange) => {
+  if (!range.start || !range.end) {
+    return;
+  }
+  console.log(range.start, range.end);
+};
 </script>
 
 <template>
   <SidebarProvider>
     <Sidebar collapsible="icon">
       <SidebarContent>
-        <SidebarGroup>
+        <SidebarGroup class="content-center p-0 w-auto">
+          <RangeCalendar v-model="calendarPickedRange" initial-focus @update:modelValue="calendarUpdated" />
           <SidebarGroupLabel>Platform</SidebarGroupLabel>
           <SidebarMenu>
             <Collapsible v-for="item in data.navMain" :key="item.title" as-child :default-open="item.isActive"
