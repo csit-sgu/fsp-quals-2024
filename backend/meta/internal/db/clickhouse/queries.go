@@ -9,5 +9,5 @@ const regionQuery = `
 `
 
 const localityQuery = `
-    SELECT DISTINCT locality FROM events WHERE region = :region
+    SELECT DISTINCT locality FROM events WHERE country = $1 AND region = $2
 `

@@ -115,9 +115,9 @@ func (c *ClickhouseClient) GetRegions(
 	country string,
 ) (regions []string, err error) {
 	results := []string{}
-	if err := c.conn.Select(ctx, &regions, countryQuery, country); err != nil {
+	if err := c.conn.Select(ctx, &regions, regionQuery, country); err != nil {
 		log.S.Error(
-			"Failed to execute country query",
+			"Failed to execute region query",
 			log.L().Add("query", countryQuery).Add("error", err),
 		)
 		return nil, err
@@ -129,11 +129,12 @@ func (c *ClickhouseClient) GetRegions(
 func (c *ClickhouseClient) GetLocalities(
 	ctx context.Context,
 	region string,
+	country string,
 ) (regions []string, err error) {
 	results := []string{}
-	if err := c.conn.Select(ctx, &regions, countryQuery, region); err != nil {
+	if err := c.conn.Select(ctx, &regions, localityQuery, country, region); err != nil {
 		log.S.Error(
-			"Failed to execute country query",
+			"Failed to execute locality query",
 			log.L().Add("query", countryQuery).Add("error", err),
 		)
 		return nil, err
