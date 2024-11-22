@@ -1,4 +1,4 @@
-CREATE TABLE events (
+CREATE TABLE db.events (
     code String NOT NULL,
     gender Enum('male' = 1, 'female' = 2) NOT NULL,
     sport String NOT NULL,
@@ -12,7 +12,7 @@ CREATE TABLE events (
 ENGINE = MergeTree()
 ORDER BY (gender, start_date, code);
 
-CREATE TABLE event_restrictions (
+CREATE TABLE db.event_restrictions (
     code String NOT NULL,
     gender Enum('male' = 1, 'female' = 2) NOT NULL,
     left_bound Datetime NOT NULL,
