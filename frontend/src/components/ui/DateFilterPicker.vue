@@ -6,11 +6,11 @@ import { RangeCalendar } from '@/components/ui/range-calendar'
 import type { DateRange } from 'radix-vue'
 
 const options = [
-  { value: 'week', label: 'Ближайшая неделя' },
-  { value: 'month', label: 'Ближайший месяц' },
-  { value: 'quarter', label: 'Ближайший квартал' },
-  { value: 'half-year', label: 'Ближайшие полгода' },
-  { value: 'manual', label: 'Указать вручную' },
+  'Ближайшая неделя',
+  'Ближайший месяц',
+  'Ближайший квартал',
+  'Ближайшие полгода',
+  'Указать вручную',
 ]
 
 const value = ref('')
@@ -36,6 +36,6 @@ const update = (newValue: string) => {
 
 <template>
   <Chooser :options="options" default-msg="Выберите диапазон..." @update="update" />
-  <RangeCalendar v-if="value == 'manual'" v-model="calendarPickedRange" initial-focus
+  <RangeCalendar v-if="value == 'Указать вручную'" v-model="calendarPickedRange" initial-focus
     @update:modelValue="calendarUpdated" />
 </template>
