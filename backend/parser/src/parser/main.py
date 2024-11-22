@@ -84,7 +84,7 @@ def dates(df: pd.DataFrame) -> pd.DataFrame:
         df["Raw"]
         .apply(lambda s: re.split(DATES_AFTER, s, maxsplit=1))
         .to_list(),
-        columns=["Raw Dates", "Raw"],
+        columns=["Raw Dates", "Raw Place"],
     )
     df = df.drop("Raw", axis=1)
     df = pd.concat((df, dates_after), axis=1)
@@ -98,6 +98,7 @@ def dates(df: pd.DataFrame) -> pd.DataFrame:
 
     return df
 
+
 def group(df: pd.DataFrame) -> pd.DataFrame:
     groups = pd.DataFrame(
         df["Raw Group"]
@@ -108,23 +109,41 @@ def group(df: pd.DataFrame) -> pd.DataFrame:
     df = df.drop("Raw Group", axis=1)
     return pd.concat((df, groups), axis=1)
 
+
+def country(df: pd.DataFrame) -> pd.DataFrame:
+    countries = pd.DataFrame(
+        df["Raw Place"]
+        .apply(lambda s: re.split("\n+", s, maxsplit=1))
+        .to_list(),
+        columns=["Country", "Raw Region"],
+    )
+    df = df.drop("Raw Place", axis=1)
+    return pd.concat((df, countries), axis=1)
+
+
 def main():
     reader = PdfReader("input.pdf")
     page = reader.pages[111]
 
-    text = page.extract_text()
-    df = remove_page_numbers(text)
-    df = split_rows(df)
-    df = competitors_number(df)
-    df = competition_title(df)
-    df = dates(df)
-    df = group(df)
+    res = page.extract_text()
+    pipeline = [
+        remove_page_numbers,
+        split_rows,
+        competitors_number,
+        competition_title,
+        dates,
+        group,
+        country,
+    ]
+    for step in pipeline:
+        res = step(res)
+    df = res
 
     print(df.info())
     for col in df:
         print(df[col].head())
 
-    for raw in df["Raw"]:
+    for raw in df["Country"]:
         print(repr(raw))
 
     for raw in df["Group"]:
