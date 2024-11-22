@@ -17,53 +17,52 @@ def remove_page_numbers(s: str) -> str:
 
 
 def split_rows(s: str) -> pd.DataFrame:
-    return pd.DataFrame(map(str.strip, re.split(ROW_START, s)))
+    return pd.DataFrame(
+        map(str.strip, re.split(ROW_START, s)), columns=["Raw"]
+    )
 
 
 def competitors_number(df: pd.DataFrame) -> pd.DataFrame:
-    rows = (
-        df[0]
+    return pd.DataFrame(
+        df["Raw"]
         .apply(lambda s: re.split(COMPETITORS_NUMBER, s, maxsplit=1))
-        .to_list()
+        .to_list(),
+        columns=["Raw", "Competitors"],
     )
-    return pd.DataFrame(rows)
 
 
 def competition_title(df: pd.DataFrame) -> pd.DataFrame:
-    comp_number = pd.DataFrame(
-        df[0]
+    comp_id = pd.DataFrame(
+        df["Raw"]
         .apply(lambda s: re.split(COMPETITION_TITLE_BEFORE, s, maxsplit=1))
-        .to_list()
+        .to_list(),
+        columns=["ID", "Raw"],
     )
-    df = df.drop(0, axis=1)
-    df = pd.concat((comp_number, df), axis=1, ignore_index=True)
+    df = df.drop("Raw", axis=1)
+    df = pd.concat((comp_id, df), axis=1)
 
     comp_name = pd.DataFrame(
-        df[1]
+        df["Raw"]
         .apply(lambda s: re.split(COMPETITION_TITLE_AFTER, s, maxsplit=1))
-        .to_list()
+        .to_list(),
+        columns=["Title", "Raw"],
     )
-    df = df.drop(1, axis=1)
-    df = pd.concat((df[0], comp_name, df[2]), axis=1, ignore_index=True)
-
-    cleaned_name = pd.DataFrame(
-        df[1]
-        .apply(lambda s: re.sub(r"\s+", " ", s.strip()))
-        .to_list()
-    )
-    cleaned_rest = pd.DataFrame(
-        df[2]
-        .apply(lambda s: s.strip())
-        .to_list()
+    df = df.drop("Raw", axis=1)
+    df = pd.concat(
+        (df["ID"], comp_name, df["Competitors"]),
+        axis=1,
     )
 
-    df = df.drop(2, axis=1)
-    return pd.concat((
-        df[0],
-        cleaned_name,
-        cleaned_rest,
-        df[3]
-    ), axis=1, ignore_index=True)
+    cleaned_title = pd.DataFrame(
+        df["Title"].apply(lambda s: re.sub(r"\s+", " ", s.strip()))
+    )
+    cleaned_rest = pd.DataFrame(df["Raw"].apply(lambda s: s.strip()))
+
+    df = df.drop("Raw", axis=1)
+    return pd.concat(
+        (df["ID"], cleaned_title, cleaned_rest, df["Competitors"]),
+        axis=1,
+    )
 
 
 def main():
@@ -76,5 +75,6 @@ def main():
     res = competitors_number(res)
     res = competition_title(res)
 
+    print(res.info())
     for col in res:
         print(res[col].head())
