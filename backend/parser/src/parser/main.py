@@ -7,16 +7,15 @@ from parser import util
 
 PAGE_NUM = r"Стр\.\s*\d+\s*из\s*\d+"
 SPORT_KIND = r"([А-Я\s]+)Основной\s+состав\s"
-RESERVE_SECTION = r"Молодежный\s+\(резервный\)\s+состав\s"
+RESERVE_SECTION = r"Молодежный\s+\(резервный\)\s+состав"
 ID = r"\d{10,}"
-ROW_START = rf"\s(?={ID}\s+)"
+ROW_START = rf"\s(?={ID}\s)"
 COMPETITORS_NUMBER = r"\s+(?=\d+$)"
 COMPETITION_TITLE_BEFORE = r"\s+"
 LOWERCASE_RUS = r"[а-я]"
 COMPETITION_TITLE_AFTER = rf"(?=\s+{LOWERCASE_RUS})"
 DATE = r"\d{2}\.\d{2}\.\d{4}"
 DATES_BEFORE = rf"\s(?={DATE}\s{DATE})"
-UNDEFINED_REGION = r"\s?ПО\s+НАЗНАЧЕНИЮ\s?"
 DATES_AFTER = rf"(?<={DATE}\s{DATE})\s"
 UPPERCASE_RUS = r"[А-Я]"
 DISCIPLINE_BEFORE = rf"\s?(?={UPPERCASE_RUS}|$)"
@@ -108,9 +107,6 @@ def group(df: pd.DataFrame) -> pd.DataFrame:
 def country(df: pd.DataFrame) -> pd.DataFrame:
     df["Raw Place"] = df["Raw Place"].apply(str.strip)
     df = df[df["Raw Place"] != "ПО НАЗНАЧЕНИЮ"]
-    for place in df["Raw Place"].to_list():
-        print(place)
-        print()
 
     df = util.flat_apply(
         df,
@@ -146,7 +142,8 @@ def region(df: pd.DataFrame) -> pd.DataFrame:
 
 def main():
     reader = PdfReader("input.pdf")
-    pages = reader.pages[86:95]
+    # pages = reader.pages[86:95]
+    pages = reader.pages[:50]
 
     res = "\n".join(page.extract_text() for page in pages)
     pipeline = [
