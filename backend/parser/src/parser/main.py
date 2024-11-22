@@ -1,4 +1,3 @@
-from numpy.ma.core import diff
 import re
 
 import pandas as pd
@@ -14,6 +13,8 @@ COMPETITION_TITLE_AFTER = rf"(?=\s+{LOWERCASE_RUS})"
 DATE = r"\d{2}\.\d{2}\.\d{4}"
 DATES_BEFORE = rf"\n(?={DATE}\n{DATE})"
 DATES_AFTER = rf"(?<={DATE}\n{DATE})\n"
+UPPERCASE_RUS = r"[А-Я]"
+DISCIPLINE_BEFORE = rf"\n?(?={UPPERCASE_RUS}|$)"
 
 
 def remove_page_numbers(s: str) -> str:
@@ -78,7 +79,7 @@ def dates(df: pd.DataFrame) -> pd.DataFrame:
     )
     df = df.drop("Raw", axis=1)
     df = pd.concat((df, dates_before), axis=1)
-    
+
     dates_after = pd.DataFrame(
         df["Raw"]
         .apply(lambda s: re.split(DATES_AFTER, s, maxsplit=1))
@@ -89,31 +90,42 @@ def dates(df: pd.DataFrame) -> pd.DataFrame:
     df = pd.concat((df, dates_after), axis=1)
 
     clean_dates = pd.DataFrame(
-        df["Raw Dates"]
-        .apply(str.split)
-        .to_list(),
-        columns=["Date Start", "Date End"]
+        df["Raw Dates"].apply(str.split).to_list(),
+        columns=["Date Start", "Date End"],
     )
     df = df.drop("Raw Dates", axis=1)
     df = pd.concat((df, clean_dates), axis=1)
 
-    return df    
+    return df
 
+def group(df: pd.DataFrame) -> pd.DataFrame:
+    groups = pd.DataFrame(
+        df["Raw Group"]
+        .apply(lambda s: re.split(DISCIPLINE_BEFORE, s, maxsplit=1))
+        .to_list(),
+        columns=["Group", "Raw Discipline"],
+    )
+    df = df.drop("Raw Group", axis=1)
+    return pd.concat((df, groups), axis=1)
 
 def main():
     reader = PdfReader("input.pdf")
     page = reader.pages[111]
 
     text = page.extract_text()
-    res = remove_page_numbers(text)
-    res = split_rows(res)
-    res = competitors_number(res)
-    res = competition_title(res)
-    res = dates(res)
+    df = remove_page_numbers(text)
+    df = split_rows(df)
+    df = competitors_number(df)
+    df = competition_title(df)
+    df = dates(df)
+    df = group(df)
 
-    print(res.info())
-    for col in res:
-        print(res[col].head())
+    print(df.info())
+    for col in df:
+        print(df[col].head())
 
-    for raw in res["Raw"]:
+    for raw in df["Raw"]:
+        print(repr(raw))
+
+    for raw in df["Group"]:
         print(repr(raw))
