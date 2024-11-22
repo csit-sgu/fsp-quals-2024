@@ -1,4 +1,4 @@
-api_keys: 
+api_keys:
   - 6f15e730-0eb6-11e3-9053-af0e97bcb74e
 enable_docs: true
 enable_pprof: true
@@ -20,8 +20,15 @@ log:
     time_key: timestamp
     time_encoder: iso8601
 database:
-  name: postgres
-  username: postgres
-  postgres: postgres
-  host: host.docker.internal
-  port: 5432
+  clickhouse:
+    name: db
+    username: user
+    password: 12345
+    host: clickhouse
+    port: 9000
+  postgres:
+    name: db
+    username: user
+    password: 12345
+    host: postgres
+    port: 5432

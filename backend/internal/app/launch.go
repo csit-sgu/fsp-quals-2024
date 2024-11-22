@@ -15,11 +15,18 @@ import (
 	"app/internal/config"
 	"app/internal/log"
 
+	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginswagger "github.com/swaggo/gin-swagger"
 )
+
+type AppContext struct {
+	Clickhouse *driver.Conn
+}
+
+var Ctx *AppContext
 
 func Launch() {
 	gin.SetMode(config.C.Server.Mode)

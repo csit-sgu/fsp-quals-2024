@@ -1,7 +1,7 @@
 package tests
 
 import (
-	"app/internal/db/sql"
+	"app/internal/db/clickhouse"
 	"app/internal/model"
 	"testing"
 
@@ -10,7 +10,7 @@ import (
 
 func TestBuildFilterQuery(t *testing.T) {
 
-	conn := &sql.Connection{}
+	client := &clickhouse.ClickhouseClient{}
 
 	// Define test cases
 	tests := []struct {
@@ -23,26 +23,26 @@ func TestBuildFilterQuery(t *testing.T) {
 			name:          "Query with one condition",
 			cond:          model.FilterCondition{Sport: "basketball"},
 			fields:        []string{"sport", "age"},
-			expectedQuery: "SELECT sport,age FROM events WHERE sport = :sport",
+			expectedQuery: "SELECT sport,age FROM events WHERE sport = @sport;",
 		},
 		{
 			name:          "Query with no conditions",
 			cond:          model.FilterCondition{},
 			fields:        []string{"id", "name"},
-			expectedQuery: "SELECT id,name FROM events ",
+			expectedQuery: "SELECT id,name FROM events ;",
 		},
 		{
 			name:          "Query with multiple conditions",
 			cond:          model.FilterCondition{Sport: "basketball", Gender: "male"},
 			fields:        []string{"id", "name"},
-			expectedQuery: "SELECT id,name FROM events WHERE gender = :gender AND sport = :sport",
+			expectedQuery: "SELECT id,name FROM events WHERE gender = @gender AND sport = @sport;",
 		},
 	}
 
 	// Execute tests
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			query := conn.BuildFilterQuery(tt.cond, tt.fields)
+			query, _ := client.BuildFilterQuery(tt.cond, tt.fields)
 			assert.Equal(t, tt.expectedQuery, query)
 		})
 	}
