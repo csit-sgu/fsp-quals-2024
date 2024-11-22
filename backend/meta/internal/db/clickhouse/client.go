@@ -84,7 +84,7 @@ func (c ClickhouseClient) FilterEvents(
 ) (events []model.Event, err error) {
 	query, namedFields := c.BuildFilterQuery(cond, fields)
 
-	if c.conn.Select(ctx, &events, query, namedFields...); err != nil {
+	if err = c.conn.Select(ctx, &events, query, namedFields...); err != nil {
 		log.S.Error(
 			"Failed to execute filter query",
 			log.L().Add("query", query).Add("error", err),

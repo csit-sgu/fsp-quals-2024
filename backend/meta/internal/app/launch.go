@@ -13,9 +13,9 @@ import (
 	"app/internal/app/middleware"
 	"app/internal/app/routes"
 	"app/internal/config"
+	"app/internal/db/clickhouse"
 	"app/internal/log"
 
-	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
@@ -23,7 +23,7 @@ import (
 )
 
 type AppContext struct {
-	Clickhouse *driver.Conn
+	Clickhouse *clickhouse.ClickhouseClient
 }
 
 var Ctx *AppContext
