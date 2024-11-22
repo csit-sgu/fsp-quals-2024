@@ -16,7 +16,6 @@ import {
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
-  SidebarBuffer,
 } from '@/components/ui/sidebar'
 import {
   BookOpen,
@@ -28,13 +27,9 @@ import {
   Settings2,
   SquareTerminal,
 } from 'lucide-vue-next'
-import type { Button } from '@/components/ui/button'
 import WeeklyView from '@/components/ui/WeeklyView.vue'
 
-import { ref, type Ref } from 'vue'
-import { CalendarDate, type DateValue } from '@internationalized/date'
-import { RangeCalendar } from '@/components/ui/range-calendar'
-import type { DateRange } from 'radix-vue'
+import DateFilterPicker from './components/ui/DateFilterPicker.vue'
 
 // This is sample data.
 const data = {
@@ -148,49 +143,26 @@ const data = {
     },
   ],
 }
-
-const today = new Date()
-const startDate = new CalendarDate(today.getFullYear(), today.getMonth(), today.getDay())
-const calendarPickedRange = ref({
-  start: startDate,
-  end: startDate.add({ days: 20 }),
-}) as Ref<DateRange>
-
-const calendarUpdated = (range: DateRange) => {
-  if (!range.start || !range.end) {
-    return
-  }
-  console.log(range.start, range.end)
-}
 </script>
 
 <template>
   <SidebarProvider>
     <Sidebar collapsible="icon">
       <SidebarContent>
-        <SidebarGroup class="content-center p-0 w-auto">
-          <RangeCalendar
-            v-model="calendarPickedRange"
-            initial-focus
-            @update:modelValue="calendarUpdated"
-          />
-          <SidebarGroupLabel>Platform</SidebarGroupLabel>
+        <SidebarGroup class="content-center px-4 w-auto">
+          <SidebarGroupLabel class="py-6">Фильтрация по дате</SidebarGroupLabel>
+          <DateFilterPicker />
+          <SidebarGroupLabel class="pt-8 pb-4">Platform</SidebarGroupLabel>
           <SidebarMenu>
-            <Collapsible
-              v-for="item in data.navMain"
-              :key="item.title"
-              as-child
-              :default-open="item.isActive"
-              class="group/collapsible"
-            >
+            <Collapsible v-for="item in data.navMain" :key="item.title" as-child :default-open="item.isActive"
+              class="group/collapsible">
               <SidebarMenuItem>
                 <CollapsibleTrigger as-child>
                   <SidebarMenuButton :tooltip="item.title">
                     <component :is="item.icon" />
                     <span>{{ item.title }}</span>
                     <ChevronRight
-                      class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
-                    />
+                      class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -213,8 +185,7 @@ const calendarUpdated = (range: DateRange) => {
     </Sidebar>
     <SidebarInset class="min-h-screen">
       <header
-        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-      >
+        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
