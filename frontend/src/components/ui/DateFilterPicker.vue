@@ -16,7 +16,7 @@ const options = [
 const value = ref('')
 
 const today = new Date();
-const startDate = new CalendarDate(today.getFullYear(), today.getMonth(), today.getDay());
+const startDate = new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
 const calendarPickedRange = ref({
   start: startDate,
   end: startDate.add({ days: 20 }),
