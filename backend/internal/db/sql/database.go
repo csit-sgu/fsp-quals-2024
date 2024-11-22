@@ -2,15 +2,16 @@ package sql
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
+	"reflect"
+	"strings"
 
 	"app/internal/config"
 	"app/internal/log"
 	"app/internal/model"
 
-	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 )
 
 var C *Connection
@@ -42,38 +43,58 @@ func Connect() (c *Connection, err error) {
 	return
 }
 
-// Initializes database schema, if required tables do not exist.
-func (c *Connection) InitSchema(ctx context.Context) error {
-	tx, err := c.db.BeginTx(ctx, nil)
-	if err != nil {
-		return err
+func (c *Connection) extractWhereParts(
+	cond model.FilterCondition,
+) (parts []string) {
+	t := reflect.TypeOf(cond)
+	v := reflect.ValueOf(cond)
+	for i := 0; i < t.NumField(); i++ {
+		key := t.Field(i).Tag.Get("db")
+		if !v.Field(i).IsZero() {
+			parts = append(parts, fmt.Sprintf("%s = :%s", key, key))
+		}
 	}
 
-	if _, err := tx.ExecContext(ctx, schema); err != nil {
-		log.S.Error(
-			"Database query has failed, performing rollback",
-			log.L().Error(err),
-		)
-		_ = tx.Rollback()
-		return err
-	}
-
-	if err := tx.Commit(); err != nil {
-		return err
-	}
-	return nil
+	return parts
 }
 
-func (c *Connection) GetBookById(
-	ctx context.Context,
-	id uuid.UUID,
-) (model.Book, error) {
-	var books []model.Book
-	if err := c.db.SelectContext(ctx, &books, selectBookById, id); err != nil {
-		log.S.Error("Database query has failed", log.L().Error(err))
-		return model.Book{}, err
+func (c *Connection) BuildFilterQuery(
+	cond model.FilterCondition,
+	fields []string,
+) (query string) {
+	fieldPart := strings.Join(fields, ",")
+	whereClause := ""
+	whereParts := strings.Join(c.extractWhereParts(cond), " AND ")
+
+	if whereParts != "" {
+		whereClause = "WHERE " + whereParts
+	} else {
+		whereClause = ""
 	}
-	return books[0], nil
+
+	query = "SELECT " + fieldPart + " " + "FROM events" + " " + whereClause
+	// log.S.Debug("Built filter query", log.L().Add("query", query))
+
+	return query
+}
+
+func (c *Connection) FilterEvents(
+	ctx context.Context,
+	cond model.FilterCondition,
+	fields []string,
+) (sql.Result, error) {
+	query := c.BuildFilterQuery(cond, fields)
+
+	rows, err := c.db.NamedExec(query, &cond)
+	if err != nil {
+		log.S.Error(
+			"Failed to execute filter query",
+			log.L().Add("query", query).Add("error", err),
+		)
+		return nil, err
+	}
+
+	return rows, nil
 }
 
 // Closes database connection.
