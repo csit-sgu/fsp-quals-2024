@@ -1,11 +1,11 @@
 api_keys:
-  - 6f15e730-0eb6-11e3-9053-af0e97bcb74e
+  # - 6f15e730-0eb6-11e3-9053-af0e97bcb74e
 enable_docs: true
 enable_pprof: true
 server:
   mode: debug
   host: 0.0.0.0
-  port: 80
+  port: 3000
   shutdown_timeout: 10
 log:
   level: debug
@@ -24,8 +24,8 @@ database:
     name: db
     username: user
     password: 12345
-    host: clickhouse
-    port: 9000
+    host: localhost
+    port: 9001
   postgres:
     name: db
     username: user

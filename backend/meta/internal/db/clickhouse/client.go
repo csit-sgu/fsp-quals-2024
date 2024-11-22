@@ -58,7 +58,12 @@ func (c ClickhouseClient) BuildFilterQuery(
 	cond model.FilterCondition,
 	fields []string,
 ) (query string, namedFields []any) {
-	fieldPart := strings.Join(fields, ",")
+	var fieldPart string
+	if len(fields) == 0 {
+		fieldPart = "*"
+	} else {
+		fieldPart = strings.Join(fields, ",")
+	}
 	whereClause := ""
 
 	parts, namedFields := c.extractWhereParts(cond)
@@ -71,7 +76,7 @@ func (c ClickhouseClient) BuildFilterQuery(
 		whereClause = ""
 	}
 
-	query = "SELECT " + fieldPart + " " + "FROM events" + " " + whereClause + ";"
+	query = "SELECT " + fieldPart + " " + "FROM db.events" + " " + whereClause + ";"
 	// log.S.Debug("Built filter query", log.L().Add("query", query))
 
 	return query, namedFields
@@ -79,6 +84,7 @@ func (c ClickhouseClient) BuildFilterQuery(
 
 func (c ClickhouseClient) FilterEvents(
 	ctx context.Context,
+	l log.LogObject,
 	cond model.FilterCondition,
 	fields []string,
 ) (events []model.Event, err error) {
@@ -90,6 +96,8 @@ func (c ClickhouseClient) FilterEvents(
 			log.L().Add("query", query).Add("error", err),
 		)
 		return nil, err
+	} else {
+		log.S.Debug("Events were retrived successfully", l.Add("count", len(events)))
 	}
 
 	return events, nil
@@ -98,8 +106,8 @@ func (c ClickhouseClient) FilterEvents(
 func (c *ClickhouseClient) GetCountries(
 	ctx context.Context,
 ) (countries []string, err error) {
-	results := []string{}
-	if err := c.conn.Select(ctx, &countries, countryQuery); err != nil {
+	var rows []model.Country
+	if err := c.conn.Select(ctx, &rows, countryQuery); err != nil {
 		log.S.Error(
 			"Failed to execute country query",
 			log.L().Add("query", countryQuery).Add("error", err),
@@ -107,15 +115,24 @@ func (c *ClickhouseClient) GetCountries(
 		return nil, err
 	}
 
-	return results, nil
+	for i := range rows {
+		countries = append(countries, rows[i].Country)
+	}
+
+	log.S.Debug(
+		"Countries were retrived successfully",
+		log.L().Add("count", len(countries)),
+	)
+
+	return countries, nil
 }
 
 func (c *ClickhouseClient) GetRegions(
 	ctx context.Context,
 	country string,
 ) (regions []string, err error) {
-	results := []string{}
-	if err := c.conn.Select(ctx, &regions, regionQuery, country); err != nil {
+	var rows []model.Region
+	if err := c.conn.Select(ctx, &rows, regionQuery, clickhouse.Named("country", country)); err != nil {
 		log.S.Error(
 			"Failed to execute region query",
 			log.L().Add("query", countryQuery).Add("error", err),
@@ -123,22 +140,40 @@ func (c *ClickhouseClient) GetRegions(
 		return nil, err
 	}
 
-	return results, nil
+	log.S.Debug(
+		"Regions were retrived successfully",
+		log.L().Add("count", len(regions)),
+	)
+
+	for i := range rows {
+		regions = append(regions, rows[i].Region)
+	}
+
+	return regions, nil
 }
 
 func (c *ClickhouseClient) GetLocalities(
 	ctx context.Context,
-	region string,
 	country string,
-) (regions []string, err error) {
-	results := []string{}
-	if err := c.conn.Select(ctx, &regions, localityQuery, country, region); err != nil {
+	region string,
+) (localities []string, err error) {
+	var rows []model.Locality
+	if err := c.conn.Select(ctx, &rows, localityQuery, clickhouse.Named("country", country), clickhouse.Named("region", region)); err != nil {
 		log.S.Error(
 			"Failed to execute locality query",
-			log.L().Add("query", countryQuery).Add("error", err),
+			log.L().Add("query", localityQuery).Add("error", err),
 		)
 		return nil, err
 	}
 
-	return results, nil
+	log.S.Debug(
+		"Localities were retrieved successfully",
+		log.L().Add("count", len(rows)),
+	)
+
+	for i := range rows {
+		localities = append(localities, rows[i].Locality)
+	}
+
+	return localities, nil
 }

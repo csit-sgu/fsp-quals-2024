@@ -25,7 +25,7 @@ func Connect(config config.DatabaseConfig) (c *Connection, err error) {
 			config.Password,
 			config.Host,
 			config.Port,
-            config.Database,
+			config.Database,
 		),
 	); err != nil {
 		return nil, err

@@ -10,7 +10,7 @@ lint:
 
 gen-docs:
     @swag init \
-        -d ./cmd/app \
+        -d ./cmd/app,internal \
         --collectionFormat multi \
         --parseInternal \
         -o ./docs \
@@ -19,7 +19,7 @@ gen-docs:
 
 format-docs:
     @swag fmt \
-        -d ./cmd/app,./internal/app/routes
+        -d ./cmd/app,./internal/app/routes/v1
 
 pre-commit: format format-docs gen-docs
 

@@ -1,13 +1,13 @@
 package clickhouse
 
 const countryQuery = `
-    SELECT DISTINCT country FROM events
+    SELECT DISTINCT country FROM db.events
 `
 
 const regionQuery = `
-    SELECT DISTINCT region FROM events WHERE country = $1
+    SELECT DISTINCT region FROM db.events WHERE country = @country
 `
 
 const localityQuery = `
-    SELECT DISTINCT locality FROM events WHERE country = $1 AND region = $2
+    SELECT DISTINCT locality FROM db.events WHERE country = @country AND region = @region
 `

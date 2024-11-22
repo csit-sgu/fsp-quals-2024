@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 
+	"app/internal/app/appcontext"
 	"app/internal/config"
 	"app/internal/db/clickhouse"
 )
@@ -11,7 +12,7 @@ import (
 func onStartup(ctx context.Context) error {
 	client := clickhouse.InitClickhouseClient(config.C.Database.Clickhouse)
 
-	Ctx = &AppContext{
+	appcontext.Ctx = &appcontext.AppContext{
 		Clickhouse: client,
 	}
 	return nil

@@ -12,21 +12,16 @@ import (
 	"app/docs"
 	"app/internal/app/middleware"
 	"app/internal/app/routes"
+	v1 "app/internal/app/routes/v1"
 	"app/internal/config"
-	"app/internal/db/clickhouse"
 	"app/internal/log"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	swaggerfiles "github.com/swaggo/files"
 	ginswagger "github.com/swaggo/gin-swagger"
 )
-
-type AppContext struct {
-	Clickhouse *clickhouse.ClickhouseClient
-}
-
-var Ctx *AppContext
 
 func Launch() {
 	gin.SetMode(config.C.Server.Mode)
@@ -39,6 +34,9 @@ func Launch() {
 	)
 	defer cancel()
 
+	corsConfig := cors.DefaultConfig()
+	// NOTE(nrydanov): For development purposes only
+	corsConfig.AllowAllOrigins = true
 	// new gin server engine
 	r := gin.New()
 	r.Use(
@@ -50,14 +48,23 @@ func Launch() {
 			"Authorization",
 			[]string{
 				"^/ping$",
+				"^/filter$",
 				"^/swagger/.*$",
 				"^/docs$",
 				"^/debug/pprof/.*$",
 			}),
+		cors.New(corsConfig),
 	)
 
 	// register handlers
 	r.GET("/ping", routes.GetPing)
+	v1Group := r.Group("")
+	{
+		v1Group.POST("/filter", v1.FilterData)
+		v1Group.GET("/countries", v1.GetCountry)
+		v1Group.GET("/regions", v1.GetRegion)
+		v1Group.GET("/localities", v1.GetLocalities)
+	}
 
 	if config.C.EnablePprof {
 		pprof.Register(r)

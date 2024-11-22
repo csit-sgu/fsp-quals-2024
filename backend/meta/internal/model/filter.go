@@ -5,14 +5,19 @@ import (
 )
 
 type FilterCondition struct {
-	Code           string    `json:"code"            db:"code"`
-	Gender         string    `json:"gender"          db:"gender"`
-	Sport          string    `json:"sport"           db:"sport"`
-	AdditionalInfo string    `json:"additional_info" db:"additional_info"`
-	Country        string    `json:"country"         db:"country"`
-	Region         string    `json:"region"          db:"region"`
-	City           string    `json:"city"            db:"city"`
-	Stage          string    `json:"stage"           db:"stage"`
-	StartDate      time.Time `json:"start_date"      db:"start_date"`
-	EndDate        time.Time `json:"end_date"        db:"end_date"`
+	Code           string    `json:"code"            `
+	Gender         string    `json:"gender"          `
+	Sport          string    `json:"sport"           `
+	AdditionalInfo string    `json:"additional_info" `
+	Country        string    `json:"country"         `
+	Region         string    `json:"region"          `
+	City           string    `json:"city"            `
+	Stage          string    `json:"stage"           `
+	StartDate      time.Time `json:"start_date"      `
+	EndDate        time.Time `json:"end_date"        `
+}
+
+type FilterRequest struct {
+	Condition      FilterCondition `json:"condition"`
+	RequiredFields []string        `json:"required_fields"`
 }
