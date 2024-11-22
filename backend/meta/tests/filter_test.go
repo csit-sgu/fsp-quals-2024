@@ -4,6 +4,7 @@ import (
 	"app/internal/db/clickhouse"
 	"app/internal/model"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -21,7 +22,7 @@ func TestBuildFilterQuery(t *testing.T) {
 	}{
 		{
 			name:          "Query with one condition",
-			cond:          model.FilterCondition{Sport: "basketball"},
+			cond:          model.FilterCondition{Sport: "basketball", DateRange: model.DateRange{From: time.Now(), To: time.Now()}},
 			fields:        []string{"sport", "age"},
 			expectedQuery: "SELECT sport,age FROM events WHERE sport = @sport;",
 		},

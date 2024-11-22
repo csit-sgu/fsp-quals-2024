@@ -40,7 +40,7 @@ const docTemplate = `{
         "/filter": {
             "post": {
                 "consumes": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"
@@ -160,9 +160,42 @@ const docTemplate = `{
                     }
                 }
             }
+        },
+        "/sports": {
+            "get": {
+                "consumes": [
+                    "text/plain"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Sport"
+                ],
+                "summary": "Get available sports",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "model.DateRange": {
+            "type": "object",
+            "properties": {
+                "from": {
+                    "type": "string"
+                },
+                "to": {
+                    "type": "string"
+                }
+            }
+        },
         "model.FilterCondition": {
             "type": "object",
             "properties": {
@@ -178,8 +211,8 @@ const docTemplate = `{
                 "country": {
                     "type": "string"
                 },
-                "end_date": {
-                    "type": "string"
+                "date_range": {
+                    "$ref": "#/definitions/model.DateRange"
                 },
                 "gender": {
                     "type": "string"
@@ -191,9 +224,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "stage": {
-                    "type": "string"
-                },
-                "start_date": {
                     "type": "string"
                 }
             }

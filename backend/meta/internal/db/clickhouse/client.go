@@ -35,21 +35,60 @@ func InitClickhouseClient(c config.DatabaseConfig) *ClickhouseClient {
 	return &ClickhouseClient{conn}
 }
 
+func (c ClickhouseClient) buildCondition(
+	key string,
+	fieldValue reflect.Value,
+	fieldType string,
+) (string, []any) {
+	switch fieldType {
+	case "common":
+		return fmt.Sprintf(
+				"%s = @%s",
+				key,
+				key,
+			), []any{
+				driver.NamedValue{Name: key, Value: fieldValue},
+			}
+	case "interval":
+		return fmt.Sprintf(
+				"%s BETWEEN @%s_from AND @%s_to",
+				key,
+				key,
+				key,
+			), []any{
+				driver.NamedValue{
+					Name:  key + "_from",
+					Value: fieldValue.FieldByName("From"),
+				},
+				driver.NamedValue{
+					Name:  key + "_to",
+					Value: fieldValue.FieldByName("To"),
+				},
+			}
+	default:
+		return "", nil
+	}
+}
+
 func (c ClickhouseClient) extractWhereParts(
 	cond model.FilterCondition,
 ) (parts []string, namedFields []any) {
 	t := reflect.TypeOf(cond)
 	v := reflect.ValueOf(cond)
 	for i := 0; i < t.NumField(); i++ {
-		key := t.Field(i).Tag.Get("db")
+		key := t.Field(i).Tag.Get("ch")
 		if !v.Field(i).IsZero() {
-			parts = append(parts, fmt.Sprintf("%s = @%s", key, key))
-			namedFields = append(namedFields, driver.NamedValue{
-				Name:  key,
-				Value: v.Field(i),
-			})
+			fieldType := t.Field(i).Tag.Get("filter")
+			part, newFields := c.buildCondition(key, v.Field(i), fieldType)
+			log.S.Debug("Condition part", log.L().Add("part", part))
+			if part != "" {
+				parts = append(parts, part)
+				namedFields = append(namedFields, newFields...)
+			}
 		}
 	}
+
+	log.S.Debug("Condition parts", log.L().Add("parts", parts))
 
 	return parts, namedFields
 }
@@ -150,6 +189,30 @@ func (c *ClickhouseClient) GetRegions(
 	}
 
 	return regions, nil
+}
+
+func (c *ClickhouseClient) GetSports(
+	ctx context.Context,
+) (sports []string, err error) {
+	var rows []model.Sport
+	if err := c.conn.Select(ctx, &rows, sportsQuery); err != nil {
+		log.S.Error(
+			"Failed to execute region query",
+			log.L().Add("query", countryQuery).Add("error", err),
+		)
+		return nil, err
+	}
+
+	log.S.Debug(
+		"Regions were retrived successfully",
+		log.L().Add("count", len(sports)),
+	)
+
+	for i := range rows {
+		sports = append(sports, rows[i].Sport)
+	}
+
+	return sports, nil
 }
 
 func (c *ClickhouseClient) GetLocalities(

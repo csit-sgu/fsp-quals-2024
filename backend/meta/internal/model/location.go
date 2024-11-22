@@ -11,3 +11,7 @@ type Region struct {
 type Locality struct {
 	Locality string `json:"locality" ch:"locality"`
 }
+
+type Sport struct {
+	Sport string `json:"sport" ch:"sport"`
+}

@@ -14,7 +14,7 @@ import (
 //
 //	@summary	Filter event data
 //	@tags		Filter
-//	@accept		plain
+//	@accept		application/json
 //
 //	@produce	json
 //	@param		request	body		model.FilterRequest	true	"Query params"
@@ -30,12 +30,12 @@ func FilterData(c *gin.Context) {
 	defer c.JSON(http.StatusOK, &resp)
 
 	var r model.FilterRequest
-	if err := c.ShouldBindQuery(&r); err != nil {
+	if err := c.ShouldBind(&r); err != nil {
 		log.S.Error("Failed to bind query", l.Error(err))
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
-	log.S.Debug("Query parameters validation successful", l)
+	log.S.Debug("Query parameters validation successful", l.Add("cond", r))
 
 	resp, err := appcontext.Ctx.Clickhouse.FilterEvents(
 		ctx,

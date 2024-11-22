@@ -20,7 +20,7 @@ import (
 //	@success	200	{string}	[]string
 //
 //	@router		/countries [GET]
-func GetCountry(c *gin.Context) {
+func GetCountries(c *gin.Context) {
 	traceId := c.GetString("trace_id")
 	ctx := c.Request.Context()
 	l := log.L().TraceId(traceId)
@@ -44,7 +44,7 @@ func GetCountry(c *gin.Context) {
 //	@produce	json
 //	@param		country	query		string	true	"Query params"
 //
-//	@success	200	{string}	[]string
+//	@success	200		{string}	[]string
 //
 //	@router		/regions [GET]
 func GetRegion(c *gin.Context) {
@@ -79,7 +79,7 @@ func GetRegion(c *gin.Context) {
 //	@param		country	query		string	true	"Country query parameter"
 //	@param		region	query		string	true	"Region query parameter"
 //
-//	@success	200	{string}	[]string
+//	@success	200		{string}	[]string
 //
 //	@router		/localities [GET]
 func GetLocalities(c *gin.Context) {
