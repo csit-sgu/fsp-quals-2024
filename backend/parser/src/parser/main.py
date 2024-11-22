@@ -3,6 +3,8 @@ import re
 import pandas as pd
 from pypdf import PdfReader
 
+from parser import util
+
 PAGE_NUM = r"Стр\.\s*\d+\s*из\s*\d+"
 ID = r"\d{10,}"
 ROW_START = rf"\n(?={ID}\s+)"
@@ -37,25 +39,18 @@ def competitors_number(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def competition_title(df: pd.DataFrame) -> pd.DataFrame:
-    comp_id = pd.DataFrame(
-        df["Raw"]
-        .apply(lambda s: re.split(COMPETITION_TITLE_BEFORE, s, maxsplit=1))
-        .to_list(),
+    df = util.flat_apply(
+        df,
+        "Raw",
+        lambda s: re.split(COMPETITION_TITLE_BEFORE, s, maxsplit=1),
         columns=["ID", "Raw"],
     )
-    df = df.drop("Raw", axis=1)
-    df = pd.concat((comp_id, df), axis=1)
 
-    comp_name = pd.DataFrame(
-        df["Raw"]
-        .apply(lambda s: re.split(COMPETITION_TITLE_AFTER, s, maxsplit=1))
-        .to_list(),
+    df = util.flat_apply(
+        df,
+        "Raw",
+        lambda s: re.split(COMPETITION_TITLE_AFTER, s, maxsplit=1),
         columns=["Title", "Raw"],
-    )
-    df = df.drop("Raw", axis=1)
-    df = pd.concat(
-        (df["ID"], comp_name, df["Competitors"]),
-        axis=1,
     )
 
     cleaned_title = pd.DataFrame(
@@ -71,54 +66,41 @@ def competition_title(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def dates(df: pd.DataFrame) -> pd.DataFrame:
-    dates_before = pd.DataFrame(
-        df["Raw"]
-        .apply(lambda s: re.split(DATES_BEFORE, s, maxsplit=1))
-        .to_list(),
+    df = util.flat_apply(
+        df,
+        "Raw",
+        lambda s: re.split(DATES_BEFORE, s, maxsplit=1),
         columns=["Raw Group", "Raw"],
     )
-    df = df.drop("Raw", axis=1)
-    df = pd.concat((df, dates_before), axis=1)
 
-    dates_after = pd.DataFrame(
-        df["Raw"]
-        .apply(lambda s: re.split(DATES_AFTER, s, maxsplit=1))
-        .to_list(),
+    df = util.flat_apply(
+        df,
+        "Raw",
+        lambda s: re.split(DATES_AFTER, s, maxsplit=1),
         columns=["Raw Dates", "Raw Place"],
     )
-    df = df.drop("Raw", axis=1)
-    df = pd.concat((df, dates_after), axis=1)
 
-    clean_dates = pd.DataFrame(
-        df["Raw Dates"].apply(str.split).to_list(),
-        columns=["Date Start", "Date End"],
+    return util.flat_apply(
+        df, "Raw Dates", str.split, columns=["Date Start", "Date End"]
     )
-    df = df.drop("Raw Dates", axis=1)
-    df = pd.concat((df, clean_dates), axis=1)
-
-    return df
 
 
 def group(df: pd.DataFrame) -> pd.DataFrame:
-    groups = pd.DataFrame(
-        df["Raw Group"]
-        .apply(lambda s: re.split(DISCIPLINE_BEFORE, s, maxsplit=1))
-        .to_list(),
+    return util.flat_apply(
+        df,
+        "Raw Group",
+        lambda s: re.split(DISCIPLINE_BEFORE, s, maxsplit=1),
         columns=["Group", "Raw Discipline"],
     )
-    df = df.drop("Raw Group", axis=1)
-    return pd.concat((df, groups), axis=1)
 
 
 def country(df: pd.DataFrame) -> pd.DataFrame:
-    countries = pd.DataFrame(
-        df["Raw Place"]
-        .apply(lambda s: re.split("\n+", s, maxsplit=1))
-        .to_list(),
+    return util.flat_apply(
+        df,
+        "Raw Place",
+        lambda s: re.split("\n+", s, maxsplit=1),
         columns=["Country", "Raw Region"],
     )
-    df = df.drop("Raw Place", axis=1)
-    return pd.concat((df, countries), axis=1)
 
 
 def main():
