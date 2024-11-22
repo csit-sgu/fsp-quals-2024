@@ -27,7 +27,7 @@ import {
   Settings2,
   SquareTerminal,
 } from 'lucide-vue-next'
-import WeeklyView from '@/components/ui/WeeklyView.vue'
+import { WeeklyView } from '@/components/ui'
 
 import DateFilterPicker from './components/ui/DateFilterPicker.vue'
 
@@ -154,15 +154,21 @@ const data = {
           <DateFilterPicker />
           <SidebarGroupLabel class="pt-8 pb-4">Platform</SidebarGroupLabel>
           <SidebarMenu>
-            <Collapsible v-for="item in data.navMain" :key="item.title" as-child :default-open="item.isActive"
-              class="group/collapsible">
+            <Collapsible
+              v-for="item in data.navMain"
+              :key="item.title"
+              as-child
+              :default-open="item.isActive"
+              class="group/collapsible"
+            >
               <SidebarMenuItem>
                 <CollapsibleTrigger as-child>
                   <SidebarMenuButton :tooltip="item.title">
                     <component :is="item.icon" />
                     <span>{{ item.title }}</span>
                     <ChevronRight
-                      class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
+                      class="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90"
+                    />
                   </SidebarMenuButton>
                 </CollapsibleTrigger>
                 <CollapsibleContent>
@@ -185,7 +191,8 @@ const data = {
     </Sidebar>
     <SidebarInset class="min-h-screen">
       <header
-        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+      >
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
