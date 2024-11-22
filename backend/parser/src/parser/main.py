@@ -1,3 +1,4 @@
+from numpy.ma.core import diff
 import re
 
 import pandas as pd
@@ -10,6 +11,9 @@ COMPETITORS_NUMBER = r"\s+(?=\d+$)"
 COMPETITION_TITLE_BEFORE = r"\s+"
 LOWERCASE_RUS = r"[а-я]"
 COMPETITION_TITLE_AFTER = rf"(?=\s+{LOWERCASE_RUS})"
+DATE = r"\d{2}\.\d{2}\.\d{4}"
+DATES_BEFORE = rf"\n(?={DATE}\n{DATE})"
+DATES_AFTER = rf"(?<={DATE}\n{DATE})\n"
 
 
 def remove_page_numbers(s: str) -> str:
@@ -65,16 +69,51 @@ def competition_title(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def dates(df: pd.DataFrame) -> pd.DataFrame:
+    dates_before = pd.DataFrame(
+        df["Raw"]
+        .apply(lambda s: re.split(DATES_BEFORE, s, maxsplit=1))
+        .to_list(),
+        columns=["Raw Group", "Raw"],
+    )
+    df = df.drop("Raw", axis=1)
+    df = pd.concat((df, dates_before), axis=1)
+    
+    dates_after = pd.DataFrame(
+        df["Raw"]
+        .apply(lambda s: re.split(DATES_AFTER, s, maxsplit=1))
+        .to_list(),
+        columns=["Raw Dates", "Raw"],
+    )
+    df = df.drop("Raw", axis=1)
+    df = pd.concat((df, dates_after), axis=1)
+
+    clean_dates = pd.DataFrame(
+        df["Raw Dates"]
+        .apply(str.split)
+        .to_list(),
+        columns=["Date Start", "Date End"]
+    )
+    df = df.drop("Raw Dates", axis=1)
+    df = pd.concat((df, clean_dates), axis=1)
+
+    return df    
+
+
 def main():
     reader = PdfReader("input.pdf")
-    page = reader.pages[1]
+    page = reader.pages[111]
 
     text = page.extract_text()
     res = remove_page_numbers(text)
     res = split_rows(res)
     res = competitors_number(res)
     res = competition_title(res)
+    res = dates(res)
 
     print(res.info())
     for col in res:
         print(res[col].head())
+
+    for raw in res["Raw"]:
+        print(repr(raw))
