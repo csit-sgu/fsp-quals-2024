@@ -13,10 +13,29 @@ import {
 import { WeeklyView, DateFilterPicker, Chooser } from '@/components/ui'
 import { ref } from 'vue'
 
-import { sports } from '@/lib/dataSource'
+import { sports, countries, getRegions, getLocalities } from '@/lib/dataSource'
 
 const pickedSport = ref('')
 const updateSport = (newValue: string) => (pickedSport.value = newValue)
+
+const pickedCountry = ref('')
+const pickedCountryRegions = ref([])
+
+const updateCountry = async (newValue: string) => {
+  pickedCountry.value = newValue
+  pickedCountryRegions.value = await getRegions(newValue)
+}
+
+const pickedRegion = ref('')
+const pickedRegionLocalities = ref([])
+
+const updateRegion = async (newValue: string) => {
+  pickedRegion.value = newValue
+  pickedRegionLocalities.value = await getLocalities(pickedCountry.value, newValue)
+}
+
+const pickedLocality = ref('')
+const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
 </script>
 
 <template>
@@ -28,13 +47,20 @@ const updateSport = (newValue: string) => (pickedSport.value = newValue)
           <DateFilterPicker />
           <SidebarGroupLabel class="pt-8 pb-6">Фитрация по соревнованиям</SidebarGroupLabel>
           <Chooser :options="sports" default-msg="Любой вид спорта" @update="updateSport" />
+          <SidebarGroupLabel class="pt-8 pb-6">Фитрация по месту проведения</SidebarGroupLabel>
+          <Chooser :options="countries" default-msg="Любая страна" @update="updateCountry" />
+          <div v-if="pickedCountry == 'Россия'" class="pb-2" />
+          <Chooser v-if="pickedCountry == 'Россия'" :options="pickedCountryRegions" default-msg="Любой регион"
+            @update="updateRegion" />
+          <div class="pt-2" />
+          <Chooser v-if="pickedRegion.length > 0 || (pickedCountry != 'Россия' && pickedCountry.length > 0)"
+            :options="pickedRegionLocalities" default-msg="Любой населённый пункт" @update="updateLocality" />
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
     <SidebarInset class="min-h-screen overflow-x-hidden">
       <header
-        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-      >
+        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
