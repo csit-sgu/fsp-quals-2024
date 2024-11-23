@@ -108,8 +108,19 @@ func (c ClickhouseClient) BuildFilterQuery(
 	}
 	whereClause := ""
 
-	parts, namedFields := c.extractWhereParts(cond)
+	paginationPart := "db.general_view.page_index > @page_lower AND db.general_view.page_index <= @page_upper"
 
+	parts, namedFields := c.extractWhereParts(cond)
+	namedFields = append(
+		namedFields,
+		clickhouse.Named("page_lower", pagination.Page*pagination.PageSize),
+	)
+	namedFields = append(
+		namedFields,
+		clickhouse.Named("page_upper", (pagination.Page+1)*pagination.PageSize),
+	)
+
+    parts = append(parts, paginationPart)
 	whereParts := strings.Join(parts, " AND ")
 
 	if whereParts != "" {
@@ -118,18 +129,10 @@ func (c ClickhouseClient) BuildFilterQuery(
 		whereClause = ""
 	}
 
-	pagiationPart := "LIMIT @limit OFFSET @offset"
+	query = fmt.Sprintf(`
+       SELECT %s FROM db.general_view %s;
+    `, fieldPart, whereClause)
 
-	namedFields = append(
-		namedFields,
-		clickhouse.Named("offset", pagination.PageSize*pagination.Page),
-	)
-	namedFields = append(
-		namedFields,
-		clickhouse.Named("limit", pagination.PageSize),
-	)
-
-	query = "SELECT " + fieldPart + " " + "FROM db.general_view" + " " + whereClause + " " + pagiationPart + ";"
 	log.S.Debug("Built filter query", log.L().Add("query", query))
 
 	return query, namedFields
@@ -151,7 +154,7 @@ func (c ClickhouseClient) FilterEvents(
 		)
 		return nil, err
 	} else {
-		log.S.Debug("Events were retrieved successfully", l.Add("count", len(events)))
+		log.S.Debug("Events were retrieved successfully", l.Add("count", len(eventViews)))
 	}
 
 	for i := range eventViews {

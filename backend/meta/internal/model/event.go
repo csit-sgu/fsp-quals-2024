@@ -31,6 +31,7 @@ type EventView struct {
 	EndDate        time.Time `json:"end_date"        ch:"end_date"`
 	Sport          string    `json:"sport"           ch:"sport"`
 	ExtraMapping   string    `json:"extra_mapping"   ch:"extra_mapping"`
+    PageIndex      uint64    `json:"page_index"      ch:"page_index"`
 }
 
 type Event struct {
