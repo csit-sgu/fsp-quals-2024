@@ -55,13 +55,13 @@ const MAX_LENGTH = 21
 <template>
   <Popover v-model:open="open">
     <PopoverTrigger as-child>
-      <Button variant="outline" role="combobox" :aria-expanded="open" class="w-[250px] justify-between">
+      <Button variant="outline" role="combobox" :aria-expanded="open" class="w-full justify-between">
         {{ value ? (value.length > MAX_LENGTH ? value.slice(0, MAX_LENGTH - 2) + '...' : value)
           : "Выберите диапазон..." }}
         <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>
-    <PopoverContent class="w-[250px] p-0">
+    <PopoverContent class="w-[19em] p-0">
       <Command>
         <CommandList>
           <CommandGroup>

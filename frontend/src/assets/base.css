@@ -107,6 +107,8 @@
 }
 
 body {
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: auto; /* Allow vertical scrolling if needed */
 
   min-height: 100vh;
   transition:

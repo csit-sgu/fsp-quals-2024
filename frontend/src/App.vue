@@ -12,7 +12,9 @@ import {
 } from '@/components/ui/sidebar'
 import { WeeklyView, DateFilterPicker, Chooser, TableView } from '@/components/ui'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { ref, type Ref, onMounted } from 'vue'
+import { ScrollArea } from '@/components/ui/scroll-area'
 
 import { sports, countries, getRegions, getLocalities, countryHasRegions } from '@/lib/dataSource'
 import SidebarFooter from './components/ui/sidebar/SidebarFooter.vue'
@@ -58,36 +60,61 @@ const updateRegion = async (newValue: string) => {
 const pickedLocality = ref('')
 const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
 
+const discipline = ref('')
+const disciplineUpdated = (newValue: string | number) => (discipline.value = newValue.toString())
+
+const additionalInfo = ref('')
+const additionalInfoUpdated = (newValue: string | number) => (additionalInfo.value = newValue.toString())
+
 const events: Ref<Competition[]> = ref([])
 onMounted(async () => {
   events.value = await getEvents(0, 10)
 })
+
+const applyFilters = () => {
+  // TODO(mchernigin): implement filters
+  console.log(pickedSport.value, pickedCountry.value, pickedRegion.value, pickedLocality.value, discipline.value + ' ' + additionalInfo.value)
+}
 </script>
 
 <template>
   <SidebarProvider>
     <Sidebar collapsible="offcanvas" class="sticky top-0 h-screen">
       <SidebarContent>
-        <SidebarGroup class="content-center px-4 w-auto">
-          <SidebarGroupLabel class="pt-4 pb-6">Фильтрация по дате</SidebarGroupLabel>
-          <DateFilterPicker @update="updateViewMode" />
-          <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по соревнованиям</SidebarGroupLabel>
-          <Chooser :options="sports" :show-search="true" default-msg="Любой вид спорта" @update="updateSport" />
-          <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по месту проведения</SidebarGroupLabel>
-          <Chooser :options="countries" :show-search="true" default-msg="Любая страна" @update="updateCountry" />
-          <div v-if="countryHasRegions(pickedCountry)" class="pb-2" />
-          <Chooser v-if="countryHasRegions(pickedCountry)" :show-search="true" :options="pickedCountryRegions"
-            default-msg="Любой регион" @update="updateRegion" />
-          <div class="pt-2" />
-          <Chooser v-if="
-            pickedRegion.length > 0 ||
-            (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
-          " :show-search="true" :options="pickedRegionLocalities" default-msg="Любой населённый пункт"
-            @update="updateLocality" />
-        </SidebarGroup>
+        <ScrollArea>
+          <SidebarGroup class="content-center px-4 w-auto">
+            <h1 class="text-2xl font-extrabold px-2 py-4">Поиск соревнований</h1>
+            <SidebarGroupLabel class="pt-4 pb-6">Фильтрация по дате</SidebarGroupLabel>
+            <DateFilterPicker @update="updateViewMode" />
+
+            <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по месту проведения</SidebarGroupLabel>
+            <Chooser :options="countries" :show-search="true" default-msg="Любая страна" @update="updateCountry" />
+            <div v-if="countryHasRegions(pickedCountry)" class="pb-2" />
+            <Chooser v-if="countryHasRegions(pickedCountry)" :show-search="true" :options="pickedCountryRegions"
+              default-msg="Любой регион" @update="updateRegion" />
+            <div class="pt-2" />
+            <Chooser v-if="
+              pickedRegion.length > 0 ||
+              (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
+            " :show-search="true" :options="pickedRegionLocalities" default-msg="Любой населённый пункт"
+              @update="updateLocality" />
+
+            <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по соревнованиям</SidebarGroupLabel>
+            <Chooser :options="sports" :show-search="true" default-msg="Любой вид спорта" @update="updateSport" />
+            <div class="pt-2">
+              <Input @update:model-value="disciplineUpdated" type="search" placeholder="Любая дисциплина..."
+                class="pt-2" />
+            </div>
+            <div class="pt-2">
+              <Input @update:model-value="additionalInfoUpdated" type="search"
+                placeholder="Поиск по другой информации..." class="pt-2" />
+            </div>
+
+          </SidebarGroup>
+        </ScrollArea>
       </SidebarContent>
       <SidebarFooter class="p-8">
-        <Button @click="updateViewMode('table')">Применить фильтры</Button>
+        <Button @click="applyFilters">Применить фильтры</Button>
         <Button variant="outline" @click="showMailSubscriptionDialog = true">Подписаться на уведомления</Button>
       </SidebarFooter>
     </Sidebar>
