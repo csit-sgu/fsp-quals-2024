@@ -24,14 +24,14 @@ onMounted(async () => {
 <template>
   <Table>
     <TableHeader>
-      <TableRow>
-        <TableHead class="text-center w-48">Вид спорта</TableHead>
-        <TableHead class="text-center w-96">Название и дисциплина/программа</TableHead>
-        <TableHead class="text-center w-48">Этап</TableHead>
-        <TableHead class="text-center w-48">Пол и возрастные категории</TableHead>
-        <TableHead class="text-center w-48">Сроки проведения</TableHead>
-        <TableHead class="text-center w-48">Место проведения</TableHead>
-        <TableHead class="text-center w-20">Количество участников</TableHead>
+      <TableRow class="h-24">
+        <TableHead class="text-lg font-bold text-center w-36">Вид спорта</TableHead>
+        <TableHead class="text-lg font-bold text-center w-96">Название и дисциплина/программа</TableHead>
+        <TableHead class="text-lg font-bold text-center w-28">Этап</TableHead>
+        <TableHead class="text-lg font-bold text-center w-48">Пол и возрастные категории</TableHead>
+        <TableHead class="text-lg font-bold text-center w-40">Сроки проведения</TableHead>
+        <TableHead class="text-lg font-bold text-center w-40">Место проведения</TableHead>
+        <TableHead class="text-lg font-bold text-center w-20">Количество участников</TableHead>
       </TableRow>
     </TableHeader>
     <TableBody>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
 import { Separator } from '@/components/ui/separator'
 import {
   Sidebar,
@@ -19,11 +19,14 @@ import SidebarFooter from './components/ui/sidebar/SidebarFooter.vue'
 import { type Competition, getEvents } from '@/lib/dataSource'
 
 const route = useRoute()
+const router = useRouter()
 
 const showMailSubscriptionDialog = ref(false)
 
-const viewMode = ref('')
-const updateViewMode = (newValue: string) => (viewMode.value = newValue)
+const updateViewMode = (newValue: string) => {
+  router.push(newValue)
+  console.log(route.path)
+}
 
 const pickedSport = ref('')
 const updateSport = (newValue: string) => (pickedSport.value = newValue)
@@ -68,9 +71,9 @@ onMounted(async () => {
         <SidebarGroup class="content-center px-4 w-auto">
           <SidebarGroupLabel class="pt-4 pb-6">Фильтрация по дате</SidebarGroupLabel>
           <DateFilterPicker @update="updateViewMode" />
-          <SidebarGroupLabel class="pt-8 pb-6">Фитрация по соревнованиям</SidebarGroupLabel>
+          <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по соревнованиям</SidebarGroupLabel>
           <Chooser :options="sports" :show-search="true" default-msg="Любой вид спорта" @update="updateSport" />
-          <SidebarGroupLabel class="pt-8 pb-6">Фитрация по месту проведения</SidebarGroupLabel>
+          <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по месту проведения</SidebarGroupLabel>
           <Chooser :options="countries" :show-search="true" default-msg="Любая страна" @update="updateCountry" />
           <div v-if="countryHasRegions(pickedCountry)" class="pb-2" />
           <Chooser v-if="countryHasRegions(pickedCountry)" :show-search="true" :options="pickedCountryRegions"
@@ -83,10 +86,9 @@ onMounted(async () => {
             @update="updateLocality" />
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
+      <SidebarFooter class="p-8">
         <Button @click="updateViewMode('table')">Применить фильтры</Button>
-        <Button variant="outline" @click="showMailSubscriptionDialog = true">Подписаться на уведомления по
-          фильтрам</Button>
+        <Button variant="outline" @click="showMailSubscriptionDialog = true">Подписаться на уведомления</Button>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset class="min-h-screen overflow-x-hidden">
@@ -98,7 +100,7 @@ onMounted(async () => {
         </div>
       </header>
       <WeeklyView v-if="route.path === '/weekly'" />
-      <TableView :eventsPromise="getEvents(0, 10)" v-if="route.path === '/table'" />
+      <TableView v-if="route.path === '/table'" :eventsPromise="getEvents(0, 10)" />
     </SidebarInset>
   </SidebarProvider>
 </template>
