@@ -16,6 +16,7 @@ class ClickHouse:
 
     def upload(self, df: pd.DataFrame):
         df["Stage"] = ""
+        df["Competitors"] = df["Competitors"].astype(int)
 
         events = pd.DataFrame(
             self.client.execute(queries.FETCH_MAIN_EVENT_FIELDS),

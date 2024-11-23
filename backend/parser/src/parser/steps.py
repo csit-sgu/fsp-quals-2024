@@ -7,10 +7,9 @@ from parser import util
 from parser.log import logger
 
 PAGE_NUM = re.compile(r"Стр\.\s*\d+\s*из\s*\d+")
-SPORT_KIND = re.compile(r"([а-яА-Я\-\s]+)Основной\s+состав\s")
+SPORT_KIND = re.compile(r"([а-яА-ЯЁ\(\)\-\s]+)Основной\s+состав\s")
 RESERVE_SECTION = re.compile(r"Молодежный\s+\(резервный\)\s+состав")
-CODE = r"\d{10,}"
-ROW_START = re.compile(rf"\s(?={CODE}\s)")
+ROW_START = re.compile(r"\s(?=\d{10,}\s)")
 COMPETITORS_NUMBER = re.compile(r"\s+(?=\d+$)")
 COMPETITION_TITLE_BEFORE = re.compile(r"\s+")
 COMPETITION_TITLE_AFTER = re.compile(r"(?=\s+[а-я])")
@@ -64,7 +63,6 @@ def competitors_number(df: pd.DataFrame) -> pd.DataFrame:
         .to_list(),
         columns=["Raw", "Competitors"],
     )
-    df["Competitors"] = df["Competitors"].apply(int)
     return df
 
 
@@ -120,6 +118,7 @@ def dates(df: pd.DataFrame) -> pd.DataFrame:
 
     df["Start Date"] = df["Start Date"].apply(parse_date)
     df["End Date"] = df["End Date"].apply(parse_date)
+    return df
 
 
 def extract_group(df: pd.DataFrame) -> pd.DataFrame:
