@@ -20,7 +20,7 @@ DISCIPLINE_BEFORE = re.compile(r"\s?(?=[А-Я]|$)")
 REGION_NAME = re.compile(r"([^,]+),\s+")
 
 AGE_PATTERNS = [
-    (re.compile(r"от\s+(\d+)\s+лет"), lambda m: (int(m.group(1)), 0)),
+    (re.compile(r"от\s+(\d+)\s+лет"), lambda m: (int(m.group(1)), 255)),
     (re.compile(r"до\s+(\d+)\s+лет"), lambda m: (0, int(m.group(1)))),
     (
         re.compile(r"(\d+)\s+-\s+(\d+)\s+лет"),
@@ -142,7 +142,7 @@ def append_age_group(
         and (len(group_buffer) == 1 or len(group_buffer) == 2)
         and ("женщины" in group_buffer or "мужчины" in group_buffer)
     ):
-        ages_buffer = [(18, 0)]
+        ages_buffer = [(18, 255)]
 
     return entries + [
         (group, GROUPS[group], *ages)
