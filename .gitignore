@@ -1,1 +1,3 @@
 db/clickhouse/data
+.DS_Store
+tmp/
