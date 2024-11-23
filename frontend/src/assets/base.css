@@ -61,6 +61,16 @@
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
   }
+
+  .toaster {
+    --error-bg: #4b0000 !important;
+    --error-border: #4b0000 !important;
+    --error-text: white !important;
+
+    --success-bg: rgb(22, 129, 0) !important;
+    --success-border: rgb(22, 129, 0) !important;
+    --success-text: white !important;
+  }
 }
 
 :root {
@@ -105,11 +115,15 @@
 }
 
 .bg-sidebar {
+  color: var(--color-foreground);
+  border-color: var(--color-border);
   background: var(--color-background);
   background-color: var(--color-background);
 }
 
 body {
+  background: var(--color-background);
+
   overflow-x: hidden; /* Prevent horizontal scroll */
   overflow-y: auto; /* Allow vertical scrolling if needed */
 
