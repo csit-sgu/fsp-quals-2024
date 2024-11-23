@@ -22,6 +22,9 @@ func SendEmail(to string, subject string, body string) error {
 	message.WriteString(fmt.Sprintf("From: %s\r\n", username))
 	message.WriteString(fmt.Sprintf("To: %s\r\n", to))
 	message.WriteString(fmt.Sprintf("Subject: %s\r\n", subject))
+	message.WriteString(
+		"MIME-version: 1.0;\r\nContent-Type: text/html; charset=\"UTF-8\";",
+	)
 	message.WriteString("\r\n")
 	message.WriteString(body)
 
@@ -38,6 +41,6 @@ func SendEmail(to string, subject string, body string) error {
 		return err
 	}
 
-	log.S.Debug("Successfully send confirmation email", log.L())
+	log.S.Debug("Successfully sent confirmation email", log.L())
 	return nil
 }

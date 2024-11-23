@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"net/http"
 
 	"app/internal/app/appcontext"
@@ -62,7 +63,8 @@ func PostSubscription(c *gin.Context) {
 	}
 	body.Confirmation = uid
 
-	err = mail.SendEmail(body.Email, config.C.Mail.Subject, config.C.Mail.Body)
+	mailBody := fmt.Sprintf(config.C.Mail.Body, body.Confirmation.String())
+	err = mail.SendEmail(body.Email, config.C.Mail.Subject, mailBody)
 	if err != nil {
 		log.S.Info("Failed to send an email", l.Error(err))
 		_ = c.Error(errors.E().Code(errors.CodeBadInput).TraceId(traceId).Message("Failed to send a confirmation email").Build()).
