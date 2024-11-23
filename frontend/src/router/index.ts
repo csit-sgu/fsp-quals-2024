@@ -9,6 +9,16 @@ const router = createRouter({
       name: 'home',
       component: MainPage,
     },
+    {
+      path: '/weekly',
+      name: 'weekly',
+      component: MainPage,
+    },
+    {
+      path: '/table',
+      name: 'table',
+      component: MainPage,
+    },
   ],
 })
 
