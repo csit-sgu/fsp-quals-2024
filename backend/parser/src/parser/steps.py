@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 import pandas as pd
 
@@ -57,12 +58,14 @@ def split_rows(s: str) -> pd.DataFrame:
 
 
 def competitors_number(df: pd.DataFrame) -> pd.DataFrame:
-    return pd.DataFrame(
+    df = pd.DataFrame(
         df["Raw"]
         .apply(lambda s: re.split(COMPETITORS_NUMBER, s, maxsplit=1))
         .to_list(),
         columns=["Raw", "Competitors"],
     )
+    df["Competitors"] = df["Competitors"].apply(int)
+    return df
 
 
 def competition_title(df: pd.DataFrame) -> pd.DataFrame:
@@ -92,6 +95,10 @@ def competition_title(df: pd.DataFrame) -> pd.DataFrame:
     )
 
 
+def parse_date(s: str) -> datetime:
+    return datetime.strptime(s, "%d.%m.%Y")
+
+
 def dates(df: pd.DataFrame) -> pd.DataFrame:
     df = util.flat_apply(
         df,
@@ -107,9 +114,12 @@ def dates(df: pd.DataFrame) -> pd.DataFrame:
         columns=["Raw Dates", "Raw Place"],
     )
 
-    return util.flat_apply(
-        df, "Raw Dates", str.split, columns=["Date Start", "Date End"]
+    df = util.flat_apply(
+        df, "Raw Dates", str.split, columns=["Start Date", "End Date"]
     )
+
+    df["Start Date"] = df["Start Date"].apply(parse_date)
+    df["End Date"] = df["End Date"].apply(parse_date)
 
 
 def extract_group(df: pd.DataFrame) -> pd.DataFrame:

@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import pandas as pd
 from clickhouse_driver import Client
 
@@ -17,20 +15,32 @@ class ClickHouse:
         logger.info("ClickHouse connection successful")
 
     def upload(self, df: pd.DataFrame):
+        df["Stage"] = ""
+
+        events = pd.DataFrame(
+            self.client.execute(queries.FETCH_MAIN_EVENT_FIELDS),
+            columns=["Code", "Start Date", "End Date"],
+        )
+
         logger.info("Clearing the tables")
         self.client.execute(queries.CLEAR_LOCATIONS_TABLE)
         self.client.execute(queries.CLEAR_EVENTS_TABLE)
         self.client.execute(queries.CLEAR_AGE_RESTRICTIONS_TABLE)
         logger.info("Tables have been cleared")
 
-        df["Stage"] = ""
-        df["Date Start"] = df["Date Start"].apply(
-            lambda x: datetime.strptime(x, "%d.%m.%Y")
+        logger.debug("Detecting deltas")
+
+        # detect updates
+        upd_codes = df.merge(
+            events, how="inner", on=["Code"], suffixes=(" New", " Old")
         )
-        df["Date End"] = df["Date End"].apply(
-            lambda x: datetime.strptime(x, "%d.%m.%Y")
-        )
-        df["Competitors"] = df["Competitors"].apply(lambda x: int(x))
+        upd_events = []
+        for _, row in upd_codes.iterrows():
+            if (
+                row["Start Date New"] != row["Start Date Old"]
+                or row["End Date New"] != row["End Date Old"]
+            ):
+                upd_events.append(row["Code"])
 
         data = pd.concat(
             (
@@ -40,8 +50,8 @@ class ClickHouse:
                 df["Raw Discipline"],
                 df["Competitors"],
                 df["Stage"],
-                df["Date Start"],
-                df["Date End"],
+                df["Start Date"],
+                df["End Date"],
             ),
             axis=1,
         ).values.tolist()
@@ -49,23 +59,23 @@ class ClickHouse:
         self.client.execute(queries.INSERT_EVENTS, data)
         logger.info("Event data has been uploaded")
 
-        tmp_df = df.explode("Locality", ignore_index=True)
+        loc_df = df.explode("Locality", ignore_index=True)
         new_cols = pd.DataFrame(
-            tmp_df["Locality"].to_list(),
+            loc_df["Locality"].to_list(),
             columns=["Region", "Locality"],
         )
-        tmp_df = tmp_df.drop("Locality", axis=1)
-        tmp_df = pd.concat((tmp_df, new_cols), axis=1)
-
+        loc_df = loc_df.drop("Locality", axis=1)
+        loc_df = pd.concat((loc_df, new_cols), axis=1)
         data = pd.concat(
             (
-                tmp_df["Code"],
-                tmp_df["Country"],
-                tmp_df["Region"],
-                tmp_df["Locality"],
+                loc_df["Code"],
+                loc_df["Country"],
+                loc_df["Region"],
+                loc_df["Locality"],
             ),
             axis=1,
         ).values.tolist()
+
         logger.info(
             f"Inserting event location information ({len(data)} records)"
         )

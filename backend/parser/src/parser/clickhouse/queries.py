@@ -12,6 +12,10 @@ CLEAR_AGE_RESTRICTIONS_TABLE = """
 TRUNCATE TABLE db.age_restrictions
 """
 
+FETCH_MAIN_EVENT_FIELDS = """
+SELECT code, start_date, end_date FROM db.events
+"""
+
 INSERT_EVENTS = """
 INSERT INTO db.events (
     code, sport, title, additional_info, n_participants,
