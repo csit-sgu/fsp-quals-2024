@@ -81,3 +81,23 @@ add column event_scale String default (
 	    'federal'
 	)
 );
+
+CREATE TABLE db.subscriptions (
+    email String NOT NULL,
+    is_active Boolean NOT NULL,
+    code String NOT NULL,
+    gender Enum('male' = 1, 'female' = 2),
+    age UInt32,
+    sport String,
+    additional_info String,
+    country String,
+    region String,
+    locality String,
+    stage String,
+    event_type String,
+    event_scale String,
+    start_date Date,
+    end_date Date,
+)
+ENGINE = MergeTree()
+ORDER BY (sport, start_date, code);
