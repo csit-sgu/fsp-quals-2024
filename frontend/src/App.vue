@@ -10,7 +10,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import { WeeklyView, DateFilterPicker, Chooser, TableView } from '@/components/ui'
+import { WeeklyView, DateFilterPicker, Chooser, TableView, SubscribeDialog } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ref, type Ref, onMounted } from 'vue'
@@ -20,7 +20,7 @@ import { sports, countries, getRegions, getLocalities, countryHasRegions } from 
 import SidebarFooter from './components/ui/sidebar/SidebarFooter.vue'
 import { type Competition, getEvents } from '@/lib/dataSource'
 
-import dayjs from 'dayjs'
+import { Toaster } from '@/components/ui/sonner'
 
 const route = useRoute()
 const router = useRouter()
@@ -74,19 +74,24 @@ onMounted(async () => {
   events.value = await getEvents(0, 10)
 })
 
-const applyFilters = () => {
-  // TODO(mchernigin): implement filters
-  console.log(
+const getFilters = () => {
+  return [
     pickedSport.value,
     pickedCountry.value,
     pickedRegion.value,
     pickedLocality.value,
     discipline.value + ' ' + additionalInfo.value,
-  )
+  ]
+}
+
+const applyFilters = () => {
+  // TODO(mchernigin): implement filters
+  console.log(getFilters())
 }
 </script>
 
 <template>
+  <Toaster richColors />
   <SidebarProvider>
     <Sidebar collapsible="offcanvas" class="sticky top-0 h-screen">
       <SidebarContent>
@@ -151,9 +156,7 @@ const applyFilters = () => {
       </SidebarContent>
       <SidebarFooter class="p-8">
         <Button @click="applyFilters">Применить фильтры</Button>
-        <Button variant="outline" @click="showMailSubscriptionDialog = true"
-          >Подписаться на уведомления</Button
-        >
+        <SubscribeDialog :searchFilters="getFilters()" />
       </SidebarFooter>
     </Sidebar>
     <SidebarInset class="min-h-screen overflow-x-hidden">

@@ -101,9 +101,12 @@
   /* TODO(aguschin): for some reason some of these values are inherited from somewhere and some
    * components ignore this setting if it is in body */
   color: var(--color-foreground);
+  border-color: var(--color-border);
+}
+
+.bg-sidebar {
   background: var(--color-background);
   background-color: var(--color-background);
-  border-color: var(--color-border);
 }
 
 body {
