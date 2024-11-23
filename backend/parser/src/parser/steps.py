@@ -179,7 +179,7 @@ def parse_restrictions(line: str) -> list[tuple[str, str, int, int]]:
                 ages_buffer.append(ages)
             else:
                 logger.debug(
-                    f"Failed to parse: {repr(line)}. At token: {token}"
+                    f"Failed to parse: {repr(line)}. At token: {repr(token)}"
                 )
 
     if len(group_buffer) > 0:
