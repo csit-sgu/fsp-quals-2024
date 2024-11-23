@@ -72,9 +72,14 @@ const eventData = props.eventData
         <div class="flex flex-col">
           <div class="font-semibold">Допустимые пол и возрастная группа:</div>
           <div v-for="{ gender, left_bound, right_bound, original } in eventData.age_data">
-            <span>{{ gender }}</span>
-            <span v-if="left_bound"> от {{ left_bound }} лет</span>
-            <span v-if="right_bound < 255"> до {{ right_bound }} лет</span>
+            <div v-if="left_bound != right_bound">
+              {{ original || gender }}
+              <span v-if="left_bound"> от {{ left_bound }} лет</span>
+              <span v-if="right_bound < 255"> до {{ right_bound }} лет</span>
+            </div>
+            <div v-if="left_bound === right_bound">
+              {{ original || gender }}, {{ left_bound }} лет
+            </div>
           </div>
         </div>
 

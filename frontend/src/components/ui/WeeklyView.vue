@@ -27,11 +27,10 @@ const renderEvents = events
     const start = dayjs(event.start_date)
     const end = dayjs(event.end_date)
     const startDiffToday = Math.round(start.diff(today, 'day', true)) + 1
-    if (startDiffToday > weekdays.length) {
+    const endDiffToday = Math.round(end.diff(today, 'day', true)) + 1
+    if (startDiffToday > weekdays.length || endDiffToday < 0) {
       return null
     }
-
-    const endDiffToday = Math.round(end.diff(today, 'day', true)) + 1
 
     const headDays = Math.max(0, startDiffToday)
     const renderDuration =

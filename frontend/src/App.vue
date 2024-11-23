@@ -154,8 +154,7 @@ const applyFilters = () => {
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
-      <WeeklyView :key="eventsWithCount.count" :events="eventsWithCount.events" :beginDay="'2024-11-23'"
-        v-if="route.path === '/weekly'" />
+      <WeeklyView :key="eventsWithCount.count" :events="eventsWithCount.events" v-if="route.path === '/weekly'" />
       <TableView :key="eventsWithCount.count" :events="eventsWithCount.events" v-if="route.path === '/table'" />
       <Pagination :key="total" v-if="eventsWithCount.events.length > 0" v-slot="{ page }" :itemsPerPage="getPageSize()"
         :total="total" :sibling-count="1" show-edges :default-page="1" class="self-center p-16">
