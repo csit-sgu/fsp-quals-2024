@@ -101,6 +101,107 @@ def group(df: pd.DataFrame) -> pd.DataFrame:
     return df
 
 
+MALE_SYNONYMS = [
+    "мужчины",
+    "юниоры",
+    "мальчики",
+    "юноши",
+]
+
+FEMALE_SYNONYMS = [
+    "женщины",
+    "юниорки",
+    "девочки",
+    "девушки",
+]
+
+age_patterns = [
+    (re.compile(r"от\s*(\d+)\s*лет"), lambda m: (int(m.group(1)), 0)),
+    (re.compile(r"до\s*(\d+)\s*лет"), lambda m: (0, int(m.group(1)))),
+    (
+        re.compile(r"(\d+)\s*-\s*(\d+)\s*лет"),
+        lambda m: (int(m.group(1)), int(m.group(2))),
+    ),
+    (re.compile(r"(\d+)\s*лет"), lambda m: (int(m.group(1)), int(m.group(1)))),
+]
+
+group_names = {
+    "мужчины": "male",
+    "юноши": "male",
+    "юниоры": "male",
+    "мальчики": "male",
+    "женщины": "female",
+    "девушки": "female",
+    "юниорки": "female",
+    "девочки": "female",
+}
+
+
+def parse_restrictions(line: str):
+    parsing_failed = False
+    entries = []
+    phrases = [phrase.strip() for phrase in line.split(",")]
+    for phrase in phrases:
+        phrase = phrase.strip()
+        groups_in_phrase = []
+        age_ranges_in_phrase = []
+
+        for group in group_names.keys():
+            if re.search(rf"\b{group}\b", phrase):
+                groups_in_phrase.append(group)
+                phrase = re.sub(rf"\b{group}\b", "", phrase)
+        phrase = phrase.strip()
+
+        for pattern, func in age_patterns:
+            match = pattern.search(phrase)
+            if match:
+                lower_bound, upper_bound = func(match)
+                age_ranges_in_phrase.append((lower_bound, upper_bound))
+                phrase = pattern.sub("", phrase, count=1)
+                phrase = phrase.strip()
+                break
+
+        if phrase:
+            parsing_failed = True
+            break
+
+        if groups_in_phrase:
+            if age_ranges_in_phrase:
+                for group in groups_in_phrase:
+                    entries.append(
+                        (
+                            group,
+                            group_names[group],
+                            age_ranges_in_phrase[0][0],
+                            age_ranges_in_phrase[0][1],
+                        )
+                    )
+            else:
+                for group in groups_in_phrase:
+                    if group in ("мужчины", "женщины"):
+                        lower_bound = 18
+                    else:
+                        lower_bound = 0
+                    entries.append((group, group_names[group], lower_bound, 0))
+        else:
+            if age_ranges_in_phrase:
+                parsing_failed = True
+                break
+            else:
+                parsing_failed = True
+                break
+
+    if parsing_failed:
+        print("Failed:", line)
+        return []
+    return entries
+
+
+def parse_group(df: pd.DataFrame) -> pd.DataFrame:
+    df["Parsed Group"] = df["Group"].apply(parse_restrictions)
+    return df
+
+
 def country(df: pd.DataFrame) -> pd.DataFrame:
     df["Raw Place"] = df["Raw Place"].apply(str.strip)
     df = df[df["Raw Place"] != "ПО НАЗНАЧЕНИЮ"]
