@@ -7,6 +7,7 @@ from parser import util
 from parser.log import logger
 
 PAGE_NUM = re.compile(r"Стр\.\s*\d+\s*из\s*\d+")
+# NOTE(evgenymng): this is an impostor Ë
 SPORT_KIND = re.compile(r"([а-яА-ЯЁ\(\)\-\s]+)Основной\s+состав\s")
 RESERVE_SECTION = re.compile(r"Молодежный\s+\(резервный\)\s+состав")
 ROW_START = re.compile(r"\s(?=\d{10,}\s)")
@@ -116,8 +117,8 @@ def dates(df: pd.DataFrame) -> pd.DataFrame:
         df, "Raw Dates", str.split, columns=["Start Date", "End Date"]
     )
 
-    df["Start Date"] = df["Start Date"].apply(parse_date)
-    df["End Date"] = df["End Date"].apply(parse_date)
+    df["Start Date"] = df["Start Date"].apply(parse_date).dt.tz_localize(None)
+    df["End Date"] = df["End Date"].apply(parse_date).dt.tz_localize(None)
     return df
 
 

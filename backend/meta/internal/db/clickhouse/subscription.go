@@ -10,6 +10,31 @@ import (
 	"github.com/google/uuid"
 )
 
+func (c *ClickhouseClient) FindSubByEmail(
+	ctx context.Context,
+	email string,
+) (bool, error) {
+	var sub []model.Subscription
+	if err := c.conn.Select(ctx, &sub, subFindByMail, clickhouse.Named("email", email)); err != nil {
+		log.S.Error(
+			"Subscription find query has failed",
+			log.L().Add("query", subFindByMail).Add("error", err),
+		)
+		return false, err
+	}
+
+	if len(sub) == 0 {
+		log.S.Info(
+			"Didn't find subscription by email in the database",
+			log.L().Add("query", subFindByMail),
+		)
+		return false, nil
+	}
+
+	log.S.Debug("Subscription was succefully found", log.L())
+	return true, nil
+}
+
 func (c *ClickhouseClient) SaveSubscription(
 	ctx context.Context,
 	sub model.Subscription,

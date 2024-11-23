@@ -16,8 +16,12 @@ def payload(ch_client: ClickHouse):
     logger.info("Parsing file's contents. This may take some time")
     sports = pipeline.parse(local_file)
     logger.info("Data has been parsed. Uploading to ClickHouse")
-    ch_client.upload(sports)
+    upd_codes = ch_client.upload(sports)
     logger.info("Data has been uploaded")
+    if len(upd_codes) != 0:
+        logger.info(f"Pushing data to Meta. Host {settings.meta_host}")
+        pipeline.meta_push(settings.meta_host, upd_codes)
+        logger.info("Pushed data to Meta")
 
 
 def main():

@@ -37,16 +37,6 @@ WHERE %s
 order by o.page_index asc
 `
 
-const subInsertQuery = `
-INSERT INTO db.subscriptions (
-    confirmation, email, is_active, code, gender, age, sport, additional_info,
-    country, region, event_type, event_scale, start_date, end_date
-) VALUES (
-    @confirmation, @email, false, @code, @gender, @age, @sport, @additional_info,
-    @country, @region, @event_type, @event_scale, @start_date, @end_date
-)
-`
-
 const filterCounterQuery = `
 with ordered as (
 	select distinct code, row_number() over (order by start_date desc) as page_index, start_date
@@ -59,6 +49,20 @@ from ordered o
 
 const codeQuery = `
 SELECT code, title, additional_info FROM db.events WHERE code in (@codes)
+`
+
+const subFindByMail = `
+SELECT * FROM db.subscriptions WHERE email = @email AND NOT is_active
+`
+
+const subInsertQuery = `
+INSERT INTO db.subscriptions (
+    confirmation, email, is_active, code, gender, age, sport, additional_info,
+    country, region, event_type, event_scale, start_date, end_date
+) VALUES (
+    @confirmation, @email, false, @code, @gender, @age, @sport, @additional_info,
+    @country, @region, @event_type, @event_scale, @start_date, @end_date
+)
 `
 
 const subCountQuery = `

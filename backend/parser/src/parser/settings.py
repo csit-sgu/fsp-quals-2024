@@ -7,6 +7,8 @@ class Settings(BaseSettings):
     ch_user: str
     ch_password: str
 
+    meta_host: str = "localhost"
+
     unload_timeout: int = 300
     remote_file: str
     no_download: bool = False

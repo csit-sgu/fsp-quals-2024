@@ -35,6 +35,19 @@ func PostSubscription(c *gin.Context) {
 		return
 	}
 
+	found, err := appcontext.Ctx.Clickhouse.FindSubByEmail(ctx, body.Email)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		c.Abort()
+		return
+	}
+	if found {
+		_ = c.Error(errors.E().Code(errors.CodeBadInput).TraceId(traceId).Message("A subscription for this email already exists").Build()).
+			SetType(gin.ErrorTypePublic)
+		c.Abort()
+		return
+	}
+
 	uid, err := uuid.NewV7()
 	if err != nil {
 		log.S.Error(
@@ -42,6 +55,7 @@ func PostSubscription(c *gin.Context) {
 			l.Error(err),
 		)
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		c.Abort()
 		return
 	}
 	body.Confirmation = uid
@@ -49,6 +63,7 @@ func PostSubscription(c *gin.Context) {
 	if err := appcontext.Ctx.Clickhouse.SaveSubscription(ctx, body); err != nil {
 		log.S.Error("Failed to submit subscription", l.Error(err))
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		c.Abort()
 		return
 	}
 

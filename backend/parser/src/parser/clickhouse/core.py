@@ -14,7 +14,7 @@ class ClickHouse:
         self.client.execute(queries.TEST)
         logger.info("ClickHouse connection successful")
 
-    def upload(self, df: pd.DataFrame):
+    def upload(self, df: pd.DataFrame) -> list[str]:
         df["Stage"] = ""
         df["Competitors"] = df["Competitors"].astype(int)
 
@@ -38,8 +38,9 @@ class ClickHouse:
         upd_events = []
         for _, row in upd_codes.iterrows():
             if (
-                row["Start Date New"] != row["Start Date Old"]
-                or row["End Date New"] != row["End Date Old"]
+                row["End Date New"].tz_localize(None) != row["End Date Old"]
+                or row["Start Date New"].tz_localize(None)
+                != row["Start Date Old"]
             ):
                 upd_events.append(row["Code"])
 
@@ -106,3 +107,5 @@ class ClickHouse:
         )
         self.client.execute(queries.INSERT_AGE_RESTRICTIONS, data)
         logger.info("Event age restrictions have been uploaded")
+
+        return upd_events

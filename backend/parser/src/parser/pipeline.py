@@ -3,6 +3,7 @@ import pandas as pd
 from pypdf import PdfReader
 
 from parser import steps
+from parser.log import logger
 
 
 def download(remote: str) -> str:
@@ -50,3 +51,13 @@ def parse(filename: str) -> pd.DataFrame:
         dataset = pd.concat((dataset, res))
 
     return dataset
+
+
+def meta_push(host: str, upd_events: list[str]):
+    logger.info(f"Sending {len(upd_events)} event codes to Meta")
+    meta_notify = f"{host}/notify"
+    with httpx.Client(verify=False) as client:
+        try:
+            client.post(meta_notify, json=upd_events)
+        except Exception as e:
+            logger.warn(f"Failed to push data to Meta: {e}")
