@@ -20,6 +20,8 @@ import { sports, countries, getRegions, getLocalities, countryHasRegions } from 
 import SidebarFooter from './components/ui/sidebar/SidebarFooter.vue'
 import { type Competition, getEvents } from '@/lib/dataSource'
 
+import dayjs from 'dayjs'
+
 const route = useRoute()
 const router = useRouter()
 
@@ -64,7 +66,8 @@ const discipline = ref('')
 const disciplineUpdated = (newValue: string | number) => (discipline.value = newValue.toString())
 
 const additionalInfo = ref('')
-const additionalInfoUpdated = (newValue: string | number) => (additionalInfo.value = newValue.toString())
+const additionalInfoUpdated = (newValue: string | number) =>
+  (additionalInfo.value = newValue.toString())
 
 const events: Ref<Competition[]> = ref([])
 onMounted(async () => {
@@ -73,7 +76,13 @@ onMounted(async () => {
 
 const applyFilters = () => {
   // TODO(mchernigin): implement filters
-  console.log(pickedSport.value, pickedCountry.value, pickedRegion.value, pickedLocality.value, discipline.value + ' ' + additionalInfo.value)
+  console.log(
+    pickedSport.value,
+    pickedCountry.value,
+    pickedRegion.value,
+    pickedLocality.value,
+    discipline.value + ' ' + additionalInfo.value,
+  )
 }
 </script>
 
@@ -88,46 +97,76 @@ const applyFilters = () => {
             <DateFilterPicker @update="updateViewMode" />
 
             <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по месту проведения</SidebarGroupLabel>
-            <Chooser :options="countries" :show-search="true" default-msg="Любая страна" @update="updateCountry" />
+            <Chooser
+              :options="countries"
+              :show-search="true"
+              default-msg="Любая страна"
+              @update="updateCountry"
+            />
             <div v-if="countryHasRegions(pickedCountry)" class="pb-2" />
-            <Chooser v-if="countryHasRegions(pickedCountry)" :show-search="true" :options="pickedCountryRegions"
-              default-msg="Любой регион" @update="updateRegion" />
+            <Chooser
+              v-if="countryHasRegions(pickedCountry)"
+              :show-search="true"
+              :options="pickedCountryRegions"
+              default-msg="Любой регион"
+              @update="updateRegion"
+            />
             <div class="pt-2" />
-            <Chooser v-if="
-              pickedRegion.length > 0 ||
-              (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
-            " :show-search="true" :options="pickedRegionLocalities" default-msg="Любой населённый пункт"
-              @update="updateLocality" />
+            <Chooser
+              v-if="
+                pickedRegion.length > 0 ||
+                (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
+              "
+              :show-search="true"
+              :options="pickedRegionLocalities"
+              default-msg="Любой населённый пункт"
+              @update="updateLocality"
+            />
 
             <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по соревнованиям</SidebarGroupLabel>
-            <Chooser :options="sports" :show-search="true" default-msg="Любой вид спорта" @update="updateSport" />
+            <Chooser
+              :options="sports"
+              :show-search="true"
+              default-msg="Любой вид спорта"
+              @update="updateSport"
+            />
             <div class="pt-2">
-              <Input @update:model-value="disciplineUpdated" type="search" placeholder="Любая дисциплина..."
-                class="pt-2" />
+              <Input
+                @update:model-value="disciplineUpdated"
+                type="search"
+                placeholder="Любая дисциплина..."
+                class="pt-2"
+              />
             </div>
             <div class="pt-2">
-              <Input @update:model-value="additionalInfoUpdated" type="search"
-                placeholder="Поиск по другой информации..." class="pt-2" />
+              <Input
+                @update:model-value="additionalInfoUpdated"
+                type="search"
+                placeholder="Поиск по другой информации..."
+                class="pt-2"
+              />
             </div>
-
           </SidebarGroup>
         </ScrollArea>
       </SidebarContent>
       <SidebarFooter class="p-8">
         <Button @click="applyFilters">Применить фильтры</Button>
-        <Button variant="outline" @click="showMailSubscriptionDialog = true">Подписаться на уведомления</Button>
+        <Button variant="outline" @click="showMailSubscriptionDialog = true"
+          >Подписаться на уведомления</Button
+        >
       </SidebarFooter>
     </Sidebar>
     <SidebarInset class="min-h-screen overflow-x-hidden">
       <header
-        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+      >
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
-      <WeeklyView v-if="route.path === '/weekly'" />
-      <TableView v-if="route.path === '/table'" :eventsPromise="getEvents(0, 10)" />
+      <WeeklyView :beginDay="'2024-11-21'" v-if="route.path === '/weekly'" />
+      <TableView :eventsPromise="getEvents(0, 10)" v-if="route.path === '/table'" />
     </SidebarInset>
   </SidebarProvider>
 </template>
