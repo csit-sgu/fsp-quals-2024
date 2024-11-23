@@ -11,14 +11,16 @@ import (
 
 // Add all required onShutdown logic here.
 func onStartup(ctx context.Context) error {
-	chClient, err := clickhouse.InitClickhouseClient(config.C.Database.Clickhouse)
-
+	chClient, err := clickhouse.InitClickhouseClient(
+		config.C.Database.Clickhouse,
+	)
 	if err != nil {
 		return err
 	}
 
-	osClient, err := opensearch.InitOpenSearchClient(config.C.Database.OpenSearch)
-
+	osClient, err := opensearch.InitOpenSearchClient(
+		config.C.Database.OpenSearch,
+	)
 	if err != nil {
 		return err
 	}

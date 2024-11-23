@@ -8,7 +8,7 @@ import (
 
 type AppContext struct {
 	Clickhouse *clickhouse.ClickhouseClient
-    OpenSearch *opensearch.Client
+	OpenSearch *opensearch.Client
 }
 
 var Ctx *AppContext

@@ -51,7 +51,7 @@ const docTemplate = `{
                 "summary": "Filter event data",
                 "parameters": [
                     {
-                        "description": "Query params",
+                        "description": "Filter data",
                         "name": "request",
                         "in": "body",
                         "required": true,
@@ -145,7 +145,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Query params",
+                        "description": "Required country",
                         "name": "country",
                         "in": "query",
                         "required": true
@@ -176,6 +176,39 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/subscription": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Leave an email subscription request",
+                "parameters": [
+                    {
+                        "description": "Subscription Info",
+                        "name": "message",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.Subscription"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
                         "schema": {
                             "type": "string"
                         }
@@ -213,6 +246,12 @@ const docTemplate = `{
                 },
                 "date_range": {
                     "$ref": "#/definitions/model.DateRange"
+                },
+                "event_scale": {
+                    "type": "string"
+                },
+                "event_type": {
+                    "type": "string"
                 },
                 "gender": {
                     "type": "string"
@@ -256,6 +295,17 @@ const docTemplate = `{
                 },
                 "page_size": {
                     "type": "integer"
+                }
+            }
+        },
+        "model.Subscription": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "filter": {
+                    "$ref": "#/definitions/model.FilterCondition"
                 }
             }
         }

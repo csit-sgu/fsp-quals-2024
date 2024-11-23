@@ -50,6 +50,8 @@ type FilterCondition struct {
 	Region         string    `json:"region"          filter:"common"   ch:"region"`
 	Locality       string    `json:"locality"        filter:"common"   ch:"locality"`
 	Stage          string    `json:"stage"           filter:"common"   ch:"stage"`
+	EventType      string    `json:"event_type"      filter:"common"   ch:"event_type"`
+	EventScale     string    `json:"event_scale"     filter:"common"   ch:"event_scale"`
 	DateRange      DateRange `json:"date_range"      filter:"interval" ch:"start_date"`
 }
 

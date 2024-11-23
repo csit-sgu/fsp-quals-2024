@@ -1,9 +1,9 @@
 package config
 
 type Databases struct {
-	Clickhouse DatabaseConfig `yaml:"clickhouse"`
-	Postgres   DatabaseConfig `yaml:"postgres"`
-    OpenSearch OpenSearchConfig `yaml:"opensearch"`
+	Clickhouse DatabaseConfig   `yaml:"clickhouse"`
+	Postgres   DatabaseConfig   `yaml:"postgres"`
+	OpenSearch OpenSearchConfig `yaml:"opensearch"`
 }
 
 type DatabaseConfig struct {

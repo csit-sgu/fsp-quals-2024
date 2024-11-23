@@ -228,7 +228,12 @@ func (c ClickhouseClient) FilterEvents(
 		}
 	}
 
-	events, err = c.applyFuzzySearch(ctx, l, request.Condition.AdditionalInfo, events)
+	events, err = c.applyFuzzySearch(
+		ctx,
+		l,
+		request.Condition.AdditionalInfo,
+		events,
+	)
 
 	log.S.Debug(
 		"Events were retrieved successfully",

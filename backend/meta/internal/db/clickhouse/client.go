@@ -24,7 +24,7 @@ func InitClickhouseClient(c config.DatabaseConfig) (*ClickhouseClient, error) {
 	})
 	if err != nil {
 		log.S.Error("Failed to connect to ClickHouse", log.L().Error(err))
-        return nil, err
+		return nil, err
 	}
 
 	return &ClickhouseClient{conn}, nil

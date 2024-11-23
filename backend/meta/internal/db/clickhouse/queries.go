@@ -37,3 +37,13 @@ inner join db.general_view using (code)
 WHERE %s
 order by o.page_index asc
 `
+
+const subInsertQuery = `
+INSERT INTO db.subscriptions (
+    email, is_active, code, gender, age, sport, additional_info,
+    country, region, event_type, event_scale, start_date, end_date
+) VALUES (
+    @email, false, @code, @gender, @age, @sport, @additional_info,
+    @country, @region, @event_type, @event_scale, @start_date, @end_date
+)
+`
