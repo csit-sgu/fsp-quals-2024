@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Chooser } from '@/components/ui'
 import { ref, type Ref } from 'vue'
 import { CalendarDate } from '@internationalized/date'
 import { RangeCalendar } from '@/components/ui/range-calendar'
@@ -45,7 +44,6 @@ const calendarUpdated = (range: DateRange) => {
   if (!range.start || !range.end) {
     return
   }
-  console.log(range.start, range.end)
 }
 
 const MAX_LENGTH = 21

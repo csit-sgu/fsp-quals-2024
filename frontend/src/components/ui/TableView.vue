@@ -9,16 +9,12 @@ import {
 } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
 import { type Competition } from '@/lib/dataSource'
-import { onMounted, ref, type Ref } from 'vue'
 
 const props = defineProps<{
-  eventsPromise: Promise<Competition[]>,
+  events: Competition[],
 }>()
-
-const events: Ref<Competition[]> = ref([])
-onMounted(async () => {
-  events.value = await props.eventsPromise
-})
+const events = props.events
+console.log(events.map((e) => e.age_data))
 </script>
 
 <template>
@@ -49,9 +45,14 @@ onMounted(async () => {
             <div class="font-semibold"></div>
             <div v-for="{ gender, left_bound, right_bound, original } in event.age_data">
               <!-- TODO(aguschin): use only original string? -->
-              <span>{{ original || gender }}</span>
-              <span v-if="left_bound !== 0"> от {{ left_bound }} лет</span>
-              <span v-if="right_bound !== 0"> до {{ right_bound }} лет</span>
+              <div v-if="left_bound != right_bound">
+                {{ original || gender }}
+                <span v-if="left_bound"> от {{ left_bound }} лет</span>
+                <span v-if="right_bound < 255"> до {{ right_bound }} лет</span>
+              </div>
+              <div v-if="left_bound === right_bound">
+                {{ original || gender }}, {{ left_bound }} лет
+              </div>
             </div>
           </div>
         </TableCell>
@@ -92,4 +93,5 @@ onMounted(async () => {
       </TableRow>
     </TableBody>
   </Table>
+  <span v-if="events.length == 0" class="text-xl text-center p-16">Ничего не найдено</span>
 </template>

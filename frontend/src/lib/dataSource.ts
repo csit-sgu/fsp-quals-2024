@@ -16,7 +16,8 @@ export type Condition = {
   locality?: string,
   region?: string,
   sport?: string,
-  stage?: string
+  event_type?: string,
+  event_scale?: string,
 }
 
 export type Competition = {
@@ -41,12 +42,22 @@ export type Competition = {
   sport: string
 }
 
+type FilterResult = {
+  events: Competition[],
+  total: number,
+}
+
+// axios.interceptors.request.use(request => {
+//   console.log('Starting Request', JSON.stringify(request, null, 2))
+//   return request
+// })
+
 export let getEvents = async (
   page: number,
   page_size: number,
   condition: Condition = {},
   required_fields: string[] = []
-): Promise<Competition[]> => await axios
+): Promise<FilterResult> => await axios
   .post(BACKEND_URL + '/filter',
     {
       condition,
