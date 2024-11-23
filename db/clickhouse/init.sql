@@ -48,7 +48,6 @@ SELECT
     gender,
     locality,
     extra_mapping,
-    dense_rank() OVER ( ORDER BY e.code) AS page_index
 FROM
     db.events AS e
 LEFT JOIN
@@ -57,3 +56,28 @@ ON e.code = l.code
 LEFT JOIN
     db.age_restrictions AS a
 ON e.code = a.code
+
+alter table db.events
+add column event_type String DEFAULT (
+	multiIf(
+        title LIKE '%ПЕРВЕНСТВ%', 'first',
+        title LIKE '%КУБОК%', 'cup',
+        title LIKE '%СОРЕВНОВАНИ%', 'competitions',
+        title LIKE '%ЧЕМПИОНАТ%', 'championship',
+        title LIKE '%ТУРНИР%', 'tournament',
+        title LIKE '%МЕРОПРИЯТИ%' or title like '%УТМ%', 'event',
+        title like '%СПАРТАКИА%', 'olympics',
+        title like '%ИГР%', 'games',
+        'unknown'
+        )
+);
+
+alter table db.events
+add column event_scale String default (
+	multiIf(
+	    (length(splitByString('ОКРУГА', title)) - 1) > 1, 'interregional',
+	    (length(splitByString('ОКРУГА', title)) - 1) = 1, 'regional',
+	    title like '%МЕЖДУНАРОДНЫ%', 'international',
+	    'federal'
+	)
+);
