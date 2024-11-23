@@ -7,8 +7,8 @@ from parser import util
 PAGE_NUM = r"Стр\.\s*\d+\s*из\s*\d+"
 SPORT_KIND = r"([А-Я\-\s]+)Основной\s+состав\s"
 RESERVE_SECTION = r"Молодежный\s+\(резервный\)\s+состав"
-ID = r"\d{10,}"
-ROW_START = rf"\s(?={ID}\s)"
+CODE = r"\d{10,}"
+ROW_START = rf"\s(?={CODE}\s)"
 COMPETITORS_NUMBER = r"\s+(?=\d+$)"
 COMPETITION_TITLE_BEFORE = r"\s+"
 COMPETITION_TITLE_AFTER = r"(?=\s+[а-я])"
@@ -49,7 +49,7 @@ def competition_title(df: pd.DataFrame) -> pd.DataFrame:
         df,
         "Raw",
         lambda s: re.split(COMPETITION_TITLE_BEFORE, s, maxsplit=1),
-        columns=["ID", "Raw"],
+        columns=["Code", "Raw"],
     )
 
     df = util.flat_apply(
@@ -66,7 +66,7 @@ def competition_title(df: pd.DataFrame) -> pd.DataFrame:
 
     df = df.drop("Raw", axis=1)
     return pd.concat(
-        (df["ID"], cleaned_title, cleaned_rest, df["Competitors"]),
+        (df["Code"], cleaned_title, cleaned_rest, df["Competitors"]),
         axis=1,
     )
 

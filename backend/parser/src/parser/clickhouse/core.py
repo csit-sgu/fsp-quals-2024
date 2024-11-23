@@ -3,18 +3,8 @@ from datetime import datetime
 import pandas as pd
 from clickhouse_driver import Client
 
-UPLOAD_EVENTS = """
-INSERT INTO db.events (
-    code, sport, title, additional_info, n_participants,
-    stage, start_date, end_date
-) VALUES
-"""
-
-UPLOAD_LOCATIONS = """
-INSERT INTO db.location_restrictions (
-    code, country, region, locality
-) VALUES
-"""
+from parser.clickhouse import queries
+from parser.log import logger
 
 
 class ClickHouse:
@@ -22,8 +12,16 @@ class ClickHouse:
         self.client = Client(
             host=host, user=user, password=password, port=port
         )
+        logger.info("Testing the ClickHouse connection")
+        self.client.execute(queries.TEST)
+        logger.info("ClickHouse connection successful")
 
     def upload(self, df: pd.DataFrame):
+        logger.info("Clearing the tables")
+        self.client.execute(queries.CLEAR_LOCATIONS_TABLE)
+        self.client.execute(queries.CLEAR_EVENTS_TABLE)
+        logger.info("Tables have been cleared")
+
         df["Stage"] = ""
         df["Date Start"] = df["Date Start"].apply(
             lambda x: datetime.strptime(x, "%d.%m.%Y")
@@ -35,7 +33,7 @@ class ClickHouse:
 
         data = pd.concat(
             (
-                df["ID"],
+                df["Code"],
                 df["Sport"],
                 df["Title"],
                 df["Raw Discipline"],
@@ -46,7 +44,9 @@ class ClickHouse:
             ),
             axis=1,
         ).values.tolist()
-        self.client.execute(UPLOAD_EVENTS, data)
+        logger.info(f"Uploading event data ({len(data)} records)")
+        self.client.execute(queries.INSERT_EVENTS, data)
+        logger.info("Event data has been uploaded")
 
         df = df.explode("Locality", ignore_index=True)
         new_cols = pd.DataFrame(
@@ -57,6 +57,10 @@ class ClickHouse:
         df = pd.concat((df, new_cols), axis=1)
 
         data = pd.concat(
-            (df["ID"], df["Country"], df["Region"], df["Locality"]), axis=1
+            (df["Code"], df["Country"], df["Region"], df["Locality"]), axis=1
         ).values.tolist()
-        self.client.execute(UPLOAD_LOCATIONS, data)
+        logger.info(
+            f"Inserting event location information ({len(data)} records)"
+        )
+        self.client.execute(queries.INSERT_LOCATIONS, data)
+        logger.info("Event locations have been uploaded")

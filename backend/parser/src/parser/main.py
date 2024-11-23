@@ -1,5 +1,5 @@
 from parser import pipeline
-from parser.clickhouse import ClickHouse
+from parser.clickhouse.core import ClickHouse
 from parser.log import logger
 from parser.settings import settings
 
@@ -15,7 +15,7 @@ def main():
     logger.info("Successfully connected to ClickHouse")
 
     logger.info("Downloading the remote file...")
-    local_file = pipeline.download(settings.remote_file)
+    # local_file = pipeline.download(settings.remote_file)
     logger.info(
         "PDF file has been downloaded. Parsing file's contents. "
         + "This may take some time"
