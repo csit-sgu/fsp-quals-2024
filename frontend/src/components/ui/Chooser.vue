@@ -29,6 +29,8 @@ const emit = defineEmits<{
   (e: 'update', value: string): void
 }>()
 
+const MAX_LENGTH = 21
+
 const value = ref('')
 const open = ref(false)
 </script>
@@ -37,7 +39,8 @@ const open = ref(false)
   <Popover v-model:open="open">
     <PopoverTrigger as-child>
       <Button variant="outline" role="combobox" :aria-expanded="open" class="w-[250px] justify-between">
-        {{ value ? value : defaultMsg }}
+        {{ value ? (value.length > MAX_LENGTH ? value.slice(0, MAX_LENGTH-2) + '...' : value)
+            : defaultMsg }}
         <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
       </Button>
     </PopoverTrigger>
@@ -47,7 +50,7 @@ const open = ref(false)
         <CommandEmpty v-if="showSearch">Ничего не найдено.</CommandEmpty>
         <CommandList>
           <CommandGroup>
-            <CommandItem v-for="option in props.options" :key="option" :value="option" @select="(ev) => {
+            <CommandItem v-for="option in props.options.filter(x => x.length > 0)" :key="option" :value="option" @select="(ev) => {
               if (typeof ev.detail.value === 'string') {
                 value = ev.detail.value
                 emit('update', value)

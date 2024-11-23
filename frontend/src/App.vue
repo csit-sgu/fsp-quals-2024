@@ -12,7 +12,7 @@ import {
 import { WeeklyView, DateFilterPicker, Chooser } from '@/components/ui'
 import { ref } from 'vue'
 
-import { sports, countries, getRegions, getLocalities } from '@/lib/dataSource'
+import { sports, countries, getRegions, getLocalities, countryHasRegions } from '@/lib/dataSource'
 
 const viewMode = ref('')
 const updateViewMode = (newValue: string) => (viewMode.value = newValue)
@@ -25,7 +25,12 @@ const pickedCountryRegions = ref([])
 
 const updateCountry = async (newValue: string) => {
   pickedCountry.value = newValue
-  pickedCountryRegions.value = await getRegions(newValue)
+  if (newValue == 'РОССИЯ') {
+    pickedCountryRegions.value = await getRegions(newValue)
+  } else {
+    pickedCountryRegions.value = []
+    pickedRegionLocalities.value = await getLocalities(newValue, "")
+  }
   pickedRegion.value = ''
   pickedLocality.value = ''
 }
@@ -64,9 +69,10 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
             default-msg="Любая страна"
             @update="updateCountry"
           />
-          <div v-if="pickedCountry == 'Россия'" class="pb-2" />
+          <div v-if="countryHasRegions(pickedCountry)" class="pb-2" />
           <Chooser
-            v-if="pickedCountry == 'Россия'"
+            v-if="countryHasRegions(pickedCountry)"
+            :show-search="true"
             :options="pickedCountryRegions"
             default-msg="Любой регион"
             @update="updateRegion"
@@ -74,8 +80,9 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
           <div class="pt-2" />
           <Chooser
             v-if="
-              pickedRegion.length > 0 || (pickedCountry != 'Россия' && pickedCountry.length > 0)
+              pickedRegion.length > 0 || (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
             "
+            :show-search="true"
             :options="pickedRegionLocalities"
             default-msg="Любой населённый пункт"
             @update="updateLocality"
