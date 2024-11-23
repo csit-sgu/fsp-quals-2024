@@ -5,10 +5,12 @@ import (
 
 	"app/internal/app/appcontext"
 	"app/internal/app/ckey"
+	"app/internal/app/errors"
 	"app/internal/log"
 	"app/internal/model"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 // Subscription controller
@@ -17,10 +19,8 @@ import (
 //	@tags		Subscription
 //	@accept		json
 //
-//	@param		message	body	model.Subscription	true	"Subscription Info"
+//	@param		request	body	model.Subscription	true	"Subscription Info"
 //	@produce	json
-//
-//	@success	201	{string}	string	"Created"
 //
 //	@router		/subscription [POST]
 func PostSubscription(c *gin.Context) {
@@ -35,9 +35,68 @@ func PostSubscription(c *gin.Context) {
 		return
 	}
 
+	uid, err := uuid.NewV7()
+	if err != nil {
+		log.S.Error(
+			"Failed to generate subscription confirmation token",
+			l.Error(err),
+		)
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+	body.Confirmation = uid
+
 	if err := appcontext.Ctx.Clickhouse.SaveSubscription(ctx, body); err != nil {
 		log.S.Error("Failed to submit subscription", l.Error(err))
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		return
+	}
+
+	c.Status(http.StatusCreated)
+}
+
+// Subscription confirmation controller
+//
+//	@summary	Confirm an email subscription request
+//	@tags		Subscription
+//	@accept		json
+//
+//	@param		request	body	model.SubscriptionConfirmation	true	"Subscription Confirmation"
+//	@produce	json
+//
+//	@success	201	{string}	string	"Confirmed"
+//
+//	@router		/subscription/confirm [POST]
+func ConfirmSubscription(c *gin.Context) {
+	traceId := c.GetString(string(ckey.TraceId))
+	ctx := c.Request.Context()
+
+	var body model.SubscriptionConfirmation
+	if err := c.ShouldBind(&body); err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypeBind)
+		c.Abort()
+		return
+	}
+
+	found, err := appcontext.Ctx.Clickhouse.FindSubscription(
+		c,
+		body.Confirmation,
+	)
+	if err != nil {
+		_ = c.Error(err).SetType(gin.ErrorTypePublic)
+		c.Abort()
+		return
+	}
+
+	if found {
+		if err := appcontext.Ctx.Clickhouse.ActivateSubscription(ctx, body.Confirmation); err != nil {
+			_ = c.Error(err).SetType(gin.ErrorTypePublic)
+			c.Abort()
+			return
+		}
+	} else {
+		_ = c.Error(errors.E().Code(errors.CodeBadInput).Message("Subscription not found").TraceId(traceId).Build()).SetType(gin.ErrorTypePublic)
+		c.Abort()
 		return
 	}
 

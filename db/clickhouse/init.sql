@@ -55,7 +55,7 @@ LEFT JOIN
 ON e.code = l.code
 LEFT JOIN
     db.age_restrictions AS a
-ON e.code = a.code
+ON e.code = a.code;
 
 alter table db.events
 add column event_type String DEFAULT (
@@ -69,7 +69,7 @@ add column event_type String DEFAULT (
         title like '%СПАРТАКИА%', 'olympics',
         title like '%ИГР%', 'games',
         'unknown'
-        )
+    )
 );
 
 alter table db.events
@@ -83,6 +83,7 @@ add column event_scale String default (
 );
 
 CREATE TABLE db.subscriptions (
+    confirmation UUID NOT NULL,
     email String NOT NULL,
     is_active Boolean NOT NULL,
     code String NOT NULL,
@@ -100,4 +101,4 @@ CREATE TABLE db.subscriptions (
     end_date Date,
 )
 ENGINE = MergeTree()
-ORDER BY (sport, start_date, code);
+ORDER BY (confirmation, email);

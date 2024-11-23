@@ -7,6 +7,7 @@ import (
 	"app/internal/model"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
+	"github.com/google/uuid"
 )
 
 func (c *ClickhouseClient) SaveSubscription(
@@ -16,19 +17,20 @@ func (c *ClickhouseClient) SaveSubscription(
 	err := c.conn.Exec(
 		ctx,
 		subInsertQuery,
-		clickhouse.Named("email", sub.Filter.Code),
-		clickhouse.Named("code", sub.Filter.Code),
-		clickhouse.Named("gender", sub.Filter.Gender),
-		clickhouse.Named("age", sub.Filter.Age),
-		clickhouse.Named("sport", sub.Filter.Sport),
-		clickhouse.Named("additional_info", sub.Filter.AdditionalInfo),
-		clickhouse.Named("country", sub.Filter.Country),
-		clickhouse.Named("region", sub.Filter.Region),
-		clickhouse.Named("locality", sub.Filter.Locality),
-		clickhouse.Named("event_type", sub.Filter.EventType),
-		clickhouse.Named("event_scale", sub.Filter.EventScale),
-		clickhouse.Named("start_date", sub.Filter.DateRange.From),
-		clickhouse.Named("end_date", sub.Filter.DateRange.To))
+		clickhouse.Named("email", sub.Code),
+		clickhouse.Named("code", sub.Code),
+		clickhouse.Named("confirmation", sub.Confirmation),
+		clickhouse.Named("gender", sub.Gender),
+		clickhouse.Named("age", sub.Age),
+		clickhouse.Named("sport", sub.Sport),
+		clickhouse.Named("additional_info", sub.AdditionalInfo),
+		clickhouse.Named("country", sub.Country),
+		clickhouse.Named("region", sub.Region),
+		clickhouse.Named("locality", sub.Locality),
+		clickhouse.Named("event_type", sub.EventType),
+		clickhouse.Named("event_scale", sub.EventScale),
+		clickhouse.Named("start_date", sub.DateRange.From),
+		clickhouse.Named("end_date", sub.DateRange.To))
 	if err != nil {
 		log.S.Error(
 			"Failed to save subscription request",
@@ -38,5 +40,46 @@ func (c *ClickhouseClient) SaveSubscription(
 	}
 
 	log.S.Debug("Subscription was succefully saved", log.L())
+	return nil
+}
+
+func (c *ClickhouseClient) FindSubscription(
+	ctx context.Context,
+	id uuid.UUID,
+) (bool, error) {
+	var count uint64
+	if err := c.conn.QueryRow(ctx, subCountQuery, clickhouse.Named("confirmation", id)).Scan(&count); err != nil {
+		log.S.Error(
+			"Subscription find query has failed",
+			log.L().Add("query", subCountQuery).Add("error", err),
+		)
+		return false, err
+	}
+
+	if count == 0 {
+		log.S.Info(
+			"Didn't find subscription confirmation in the database",
+			log.L().Add("query", subCountQuery),
+		)
+		return false, nil
+	}
+
+	log.S.Debug("Subscription was succefully found", log.L())
+	return true, nil
+}
+
+func (c *ClickhouseClient) ActivateSubscription(
+	ctx context.Context,
+	id uuid.UUID,
+) error {
+	if err := c.conn.Exec(ctx, subActivateQuery, clickhouse.Named("confirmation", id)); err != nil {
+		log.S.Error(
+			"Failed to activate subscription",
+			log.L().Add("query", subActivateQuery).Add("error", err),
+		)
+		return err
+	}
+
+	log.S.Debug("Subscription was succefully activated", log.L())
 	return nil
 }

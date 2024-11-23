@@ -234,7 +234,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Subscription Info",
-                        "name": "message",
+                        "name": "request",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -242,9 +242,35 @@ const docTemplate = `{
                         }
                     }
                 ],
+                "responses": {}
+            }
+        },
+        "/subscription/confirm": {
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Subscription"
+                ],
+                "summary": "Confirm an email subscription request",
+                "parameters": [
+                    {
+                        "description": "Subscription Confirmation",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/model.SubscriptionConfirmation"
+                        }
+                    }
+                ],
                 "responses": {
                     "201": {
-                        "description": "Created",
+                        "description": "Confirmed",
                         "schema": {
                             "type": "string"
                         }
@@ -337,11 +363,52 @@ const docTemplate = `{
         "model.Subscription": {
             "type": "object",
             "properties": {
+                "additional_info": {
+                    "type": "string"
+                },
+                "age": {
+                    "type": "integer"
+                },
+                "code": {
+                    "type": "string"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "date_range": {
+                    "$ref": "#/definitions/model.DateRange"
+                },
                 "email": {
                     "type": "string"
                 },
-                "filter": {
-                    "$ref": "#/definitions/model.FilterCondition"
+                "event_scale": {
+                    "type": "string"
+                },
+                "event_type": {
+                    "type": "string"
+                },
+                "gender": {
+                    "type": "string"
+                },
+                "locality": {
+                    "type": "string"
+                },
+                "region": {
+                    "type": "string"
+                },
+                "sport": {
+                    "type": "string"
+                },
+                "stage": {
+                    "type": "string"
+                }
+            }
+        },
+        "model.SubscriptionConfirmation": {
+            "type": "object",
+            "properties": {
+                "confirmation": {
+                    "type": "string"
                 }
             }
         }

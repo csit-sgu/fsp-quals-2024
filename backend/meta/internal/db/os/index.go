@@ -1,11 +1,12 @@
 package os
 
 import (
-	"app/internal/log"
-	"app/internal/model"
 	"context"
 	"fmt"
 	"strings"
+
+	"app/internal/log"
+	"app/internal/model"
 
 	"github.com/opensearch-project/opensearch-go"
 )
@@ -37,7 +38,6 @@ func (c *OpenSearch) IndexData(
 	l log.LogObject,
 	indexData []*model.IndexData,
 ) error {
-
 	query := c.convertToQuery(indexData)
 
 	log.S.Debug("Built query for bulk request", l.Add("query", query))

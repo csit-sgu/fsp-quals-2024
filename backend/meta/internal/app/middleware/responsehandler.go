@@ -41,13 +41,15 @@ func ResponseHandler() gin.HandlerFunc {
 				return
 			}
 
-			if serr, ok := err.Err.(*errors.ServiceError); ok {
+			if serr, ok := err.Err.(errors.ServiceError); ok {
 				log.S.Warn("Service error", l)
 
 				// NOTE(evgenymng): switch by code here, if needed
 				switch serr.Code {
 				case errors.CodeUnauthorized:
 					c.JSON(http.StatusUnauthorized, serr)
+				case errors.CodeBadInput:
+					c.JSON(http.StatusBadRequest, serr)
 				default:
 					c.JSON(http.StatusInternalServerError, serr)
 				}

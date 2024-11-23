@@ -39,13 +39,14 @@ order by o.page_index asc
 
 const subInsertQuery = `
 INSERT INTO db.subscriptions (
-    email, is_active, code, gender, age, sport, additional_info,
+    confirmation, email, is_active, code, gender, age, sport, additional_info,
     country, region, event_type, event_scale, start_date, end_date
 ) VALUES (
-    @email, false, @code, @gender, @age, @sport, @additional_info,
+    @confirmation, @email, false, @code, @gender, @age, @sport, @additional_info,
     @country, @region, @event_type, @event_scale, @start_date, @end_date
 )
 `
+
 const filterCounterQuery = `
 with ordered as (
 	select distinct code, row_number() over (order by start_date desc) as page_index, start_date
@@ -57,5 +58,15 @@ from ordered o
 `
 
 const codeQuery = `
-    SELECT code, title, additional_info FROM db.events WHERE code in (@codes)
+SELECT code, title, additional_info FROM db.events WHERE code in (@codes)
+`
+
+const subCountQuery = `
+SELECT count(*) FROM db.subscriptions
+WHERE confirmation = @confirmation
+`
+
+const subActivateQuery = `
+ALTER TABLE db.subscriptions
+UPDATE is_active = true WHERE confirmation = @confirmation
 `

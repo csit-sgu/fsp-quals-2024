@@ -39,17 +39,20 @@ func onStartup(ctx context.Context) error {
 		Body:  settings,
 	}
 
-    log.S.Debug("OpenSearch index was created", log.L().Add("index", config.C.Database.OpenSearch.Index))
+	log.S.Debug(
+		"OpenSearch index was created",
+		log.L().Add("index", config.C.Database.OpenSearch.Index),
+	)
 
 	appcontext.Ctx = &appcontext.AppContext{
 		Clickhouse: chClient,
 		OpenSearch: &os.OpenSearch{
 			Client: osClient,
-			Index: config.C.Database.OpenSearch.Index,
+			Index:  config.C.Database.OpenSearch.Index,
 		},
 	}
 
-    log.S.Debug("App startup is complete", log.L())
+	log.S.Debug("App startup is complete", log.L())
 
 	return nil
 }

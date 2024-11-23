@@ -41,7 +41,6 @@ func FilterData(c *gin.Context) {
 		l,
 		r,
 	)
-
 	if err != nil {
 		log.S.Error("Failed to filter events", l.Error(err))
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
