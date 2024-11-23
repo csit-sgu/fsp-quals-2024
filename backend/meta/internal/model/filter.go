@@ -36,8 +36,8 @@ func (customTime CustomTime) String() string {
 }
 
 type Pagination struct {
-	PageSize uint32 `json:"page_size"`
-	Page     uint32 `json:"page"`
+	PageSize uint64 `json:"page_size"`
+	Page     uint64 `json:"page"`
 }
 
 type FilterCondition struct {
@@ -59,4 +59,14 @@ type FilterRequest struct {
 	Condition      FilterCondition `json:"condition"`
 	RequiredFields []string        `json:"required_fields"`
 	Pagination     Pagination      `json:"pagination"`
+}
+
+type FilterResponse struct {
+	Events     []*Event `json:"events"`
+	TotalPages uint64   `json:"total_pages"`
+}
+
+type FilterView struct {
+	Events []EventView
+	Total  uint32
 }

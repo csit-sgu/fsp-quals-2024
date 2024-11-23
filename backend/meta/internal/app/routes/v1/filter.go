@@ -19,14 +19,14 @@ import (
 //	@produce	json
 //	@param		request	body		model.FilterRequest	true	"Filter data"
 //
-//	@success	200		{string}	model.Event
+//	@success	200		{string}	model.FilterResponse
 //
 //	@router		/filter [post]
 func FilterData(c *gin.Context) {
 	traceId := c.GetString("trace_id")
 	ctx := c.Request.Context()
 	l := log.L().TraceId(traceId)
-	var resp []*model.Event
+	var resp model.FilterResponse
 
 	var r model.FilterRequest
 	if err := c.ShouldBind(&r); err != nil {
@@ -42,12 +42,13 @@ func FilterData(c *gin.Context) {
 		r,
 	)
 
-	log.S.Debug("Successfully filtered events", l.Add("events", resp))
 	if err != nil {
 		log.S.Error("Failed to filter events", l.Error(err))
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
+
+	log.S.Debug("Successfully filtered events", l.Add("events", resp))
 
 	c.JSON(http.StatusOK, &resp)
 }

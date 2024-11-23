@@ -27,8 +27,7 @@ const locationQuery = `
 const filterQuery = `
 with ordered as (
 	select distinct code, row_number() over (order by start_date desc) as page_index, start_date
-	from db.events
-    %s
+	from db.events %s
 	order by start_date desc
 )
 select %s
@@ -46,4 +45,17 @@ INSERT INTO db.subscriptions (
     @email, false, @code, @gender, @age, @sport, @additional_info,
     @country, @region, @event_type, @event_scale, @start_date, @end_date
 )
+`
+const filterCounterQuery = `
+with ordered as (
+	select distinct code, row_number() over (order by start_date desc) as page_index, start_date
+	from db.events %s
+	order by start_date desc
+)
+select count() as count
+from ordered o
+`
+
+const codeQuery = `
+    SELECT code, title, additional_info FROM db.events WHERE code in (@codes)
 `

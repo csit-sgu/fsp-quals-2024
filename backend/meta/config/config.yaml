@@ -35,6 +35,6 @@ database:
   opensearch:
     host: localhost
     port: 9200
-    username: user
-    password: 12345
-    index: index
+    username: admin
+    password: Za4emontebe
+    index: event-index

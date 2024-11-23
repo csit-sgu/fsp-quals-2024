@@ -116,7 +116,7 @@ func (c ClickhouseClient) getAgeRestrictionQuery(
 
 func (c ClickhouseClient) BuildFilterQuery(
 	request model.FilterRequest,
-) (query string, namedFields []any) {
+) (query string, namedFields []any, whereClause string) {
 	var fieldPart string
 	fields := request.RequiredFields
 	cond := request.Condition
@@ -126,7 +126,7 @@ func (c ClickhouseClient) BuildFilterQuery(
 	} else {
 		fieldPart = strings.Join(fields, ",")
 	}
-	whereClause := ""
+	whereClause = ""
 
 	paginationPart := "o.page_index >= @page_lower AND o.page_index <= @page_upper"
 
@@ -152,7 +152,31 @@ func (c ClickhouseClient) BuildFilterQuery(
 
 	log.S.Debug("Built filter query", log.L().Add("query", query))
 
-	return query, namedFields
+	return query, namedFields, whereClause
+}
+
+func (c ClickhouseClient) GetIndexData(
+	ctx context.Context,
+	l log.LogObject,
+	request model.NotifyRequest,
+) (indexData []*model.IndexData, err error) {
+	query := codeQuery
+	arg := clickhouse.Named("codes", request)
+
+	if err = c.conn.Select(ctx, &indexData, query, arg); err != nil {
+		log.S.Error(
+			"Failed to execute region query",
+			log.L().Add("query", query).Add("error", err),
+		)
+		return nil, err
+	} else {
+		log.S.Debug(
+			"Index data were retrived successfully",
+			log.L().Add("count", len(indexData)),
+		)
+	}
+
+	return indexData, nil
 }
 
 func (c ClickhouseClient) applyFuzzySearch(
@@ -164,24 +188,41 @@ func (c ClickhouseClient) applyFuzzySearch(
 	return e, nil
 }
 
+type Count struct {
+	Count uint64 `ch:"count"`
+}
+
 func (c ClickhouseClient) FilterEvents(
 	ctx context.Context,
 	l log.LogObject,
 	request model.FilterRequest,
-) (events []*model.Event, err error) {
-	query, namedFields := c.BuildFilterQuery(request)
+) (response model.FilterResponse, err error) {
+	query, namedFields, whereClause := c.BuildFilterQuery(request)
 
 	mapping := make(map[string]model.Event)
-	var eventViews []model.EventView
+	filterView := model.FilterView{}
+	total := []Count{}
+	eventViews := filterView.Events
 	if err = c.conn.Select(ctx, &eventViews, query, namedFields...); err != nil {
 		log.S.Error(
 			"Failed to execute filter query",
 			log.L().Add("query", query).Add("error", err),
 		)
-		return nil, err
+		return model.FilterResponse{}, err
 	} else {
 		log.S.Debug("Events were retrieved successfully", l.Add("count", len(eventViews)))
 	}
+	if err = c.conn.Select(ctx, &total, fmt.Sprintf(
+		filterCounterQuery,
+		whereClause,
+	), namedFields...); err != nil {
+		log.S.Error(
+			"Failed to execute filter counter query",
+			log.L().Add("query", filterCounterQuery).Add("error", err),
+		)
+		return model.FilterResponse{}, err
+	}
+	filterView.Total = uint32(total[0].Count)
 
 	for i := range eventViews {
 		currentEvent, ok := mapping[eventViews[i].Code]
@@ -222,23 +263,20 @@ func (c ClickhouseClient) FilterEvents(
 				Sport:          view.Sport,
 			}
 
-			events = append(events, &event)
+			response.Events = append(response.Events, &event)
 
 			mapping[view.Code] = event
 		}
 	}
 
-	events, err = c.applyFuzzySearch(
+	response.Events, err = c.applyFuzzySearch(
 		ctx,
 		l,
 		request.Condition.AdditionalInfo,
-		events,
+		response.Events,
 	)
 
-	log.S.Debug(
-		"Events were retrieved successfully",
-		log.L().Add("count", eventViews[0]),
-	)
+	response.TotalPages = (total[0].Count + request.Pagination.PageSize - 1) / request.Pagination.PageSize
 
-	return events, nil
+	return response, nil
 }

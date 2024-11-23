@@ -2,13 +2,12 @@ package appcontext
 
 import (
 	"app/internal/db/clickhouse"
-
-	"github.com/opensearch-project/opensearch-go"
+	"app/internal/db/os"
 )
 
 type AppContext struct {
 	Clickhouse *clickhouse.ClickhouseClient
-	OpenSearch *opensearch.Client
+	OpenSearch *os.OpenSearch
 }
 
 var Ctx *AppContext
