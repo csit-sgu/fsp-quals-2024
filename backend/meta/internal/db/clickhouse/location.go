@@ -83,18 +83,3 @@ func (c *ClickhouseClient) GetLocalities(
 
 	return localities, nil
 }
-
-func (c ClickhouseClient) getLocationData(
-	ctx context.Context,
-	code string,
-) (locationData []model.LocationData, err error) {
-	if err := c.conn.Select(ctx, &locationData, locationQuery, clickhouse.Named("code", code)); err != nil {
-		log.S.Error(
-			"Failed to execute age query",
-			log.L().Add("query", locationQuery).Add("error", err),
-		)
-		return nil, err
-	}
-
-	return locationData, nil
-}

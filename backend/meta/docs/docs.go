@@ -111,7 +111,7 @@ const docTemplate = `{
         "/notify": {
             "post": {
                 "consumes": [
-                    "text/plain"
+                    "application/json"
                 ],
                 "produces": [
                     "application/json"

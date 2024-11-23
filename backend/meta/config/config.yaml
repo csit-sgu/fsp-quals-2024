@@ -63,4 +63,4 @@ database:
     port: 9200
     username: admin
     password: Za4emontebe
-    index: event-index
+    index: events

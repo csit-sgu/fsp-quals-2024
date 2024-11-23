@@ -159,14 +159,14 @@ func (c ClickhouseClient) GetIndexData(
 	ctx context.Context,
 	l log.LogObject,
 	request model.NotifyRequest,
-) (indexData []*model.IndexData, err error) {
+) (indexData []model.IndexData, err error) {
 	query := codeQuery
-	arg := clickhouse.Named("codes", request)
+	arg := clickhouse.Named("codes", &request)
 
 	if err = c.conn.Select(ctx, &indexData, query, arg); err != nil {
 		log.S.Error(
-			"Failed to execute region query",
-			log.L().Add("query", query).Add("error", err),
+			"Failed to execute index query",
+			log.L().Add("query", query).Error(err),
 		)
 		return nil, err
 	} else {
@@ -179,14 +179,6 @@ func (c ClickhouseClient) GetIndexData(
 	return indexData, nil
 }
 
-func (c ClickhouseClient) applyFuzzySearch(
-	ctx context.Context,
-	l log.LogObject,
-	searchString string,
-	e []*model.Event,
-) (events []*model.Event, err error) {
-	return e, nil
-}
 
 type Count struct {
 	Count uint64 `ch:"count"`
@@ -269,14 +261,7 @@ func (c ClickhouseClient) FilterEvents(
 		}
 	}
 
-	response.Events, err = c.applyFuzzySearch(
-		ctx,
-		l,
-		request.Condition.AdditionalInfo,
-		response.Events,
-	)
-
-	response.TotalPages = (total[0].Count + request.Pagination.PageSize - 1) / request.Pagination.PageSize
+	response.Total = total[0].Count
 
 	return response, nil
 }

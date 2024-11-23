@@ -47,7 +47,7 @@ func FilterData(c *gin.Context) {
 		return
 	}
 
-	log.S.Debug("Successfully filtered events", l.Add("events", resp))
+	log.S.Debug("Successfully filtered events", l)
 
 	c.JSON(http.StatusOK, &resp)
 }

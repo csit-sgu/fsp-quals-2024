@@ -16,7 +16,7 @@ type OpenSearch struct {
 	Index  string
 }
 
-func (c *OpenSearch) convertToQuery(index []*model.IndexData) string {
+func (c *OpenSearch) convertToQuery(index []model.IndexData) string {
 	query := ""
 	for i := range index {
 		query += fmt.Sprintf(
@@ -36,7 +36,7 @@ func (c *OpenSearch) convertToQuery(index []*model.IndexData) string {
 func (c *OpenSearch) IndexData(
 	ctx context.Context,
 	l log.LogObject,
-	indexData []*model.IndexData,
+	indexData []model.IndexData,
 ) error {
 	query := c.convertToQuery(indexData)
 

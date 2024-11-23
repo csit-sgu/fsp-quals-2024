@@ -63,7 +63,7 @@ type FilterRequest struct {
 
 type FilterResponse struct {
 	Events     []*Event `json:"events"`
-	TotalPages uint64   `json:"total_pages"`
+	Total uint64   `json:"total"`
 }
 
 type FilterView struct {

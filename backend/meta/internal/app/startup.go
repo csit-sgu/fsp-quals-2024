@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"strings"
 
@@ -24,25 +25,77 @@ func onStartup(ctx context.Context) error {
 
 	osClient, err := os.InitOpenSearchClient(config.C.Database.OpenSearch)
 	if err != nil {
+		log.S.Error(
+			"Failed to init OpenSearch client",
+			log.L().Error(err),
+		)
 		return err
 	}
 
-	settings := strings.NewReader(`{
+    settings := strings.NewReader(`{
         "settings": {
             "number_of_shards": 1,
-            "number_of_replicas": 0
+            "number_of_replicas": 0,
+            "analysis": {
+                "filter": {
+                    "russian_stop": {
+                      "type": "stop",
+                      "stopwords": "_russian_"
+                    },
+                    "russian_stemmer": {
+                      "type": "stemmer",
+                      "language": "russian"
+                    },
+                    "russian_keywords": {
+                      "type": "keyword_marker",
+                      "keywords": []
+                    }
+                },
+                "analyzer": {
+                    "russian_analyzer": {
+                        "type": "custom",
+                        "tokenizer": "standard",
+                        "filter": [
+                            "lowercase",
+                            "russian_stop",
+                            "russian_stemmer",
+                            "russian_keywords"
+                        ]
+                    }
+                }
+            }
+        },
+        "mappings": {
+            "properties": {
+                "title": {
+                    "type": "text",
+                    "analyzer": "russian_analyzer"
+                },
+                "additional_info": {
+                    "type": "text",
+                    "analyzer": "russian_analyzer"
+                }
+            }
         }
     }`)
-
-	_ = opensearchapi.IndicesCreateRequest{
+    resp, err := opensearchapi.IndicesCreateRequest{
 		Index: config.C.Database.OpenSearch.Index,
 		Body:  settings,
-	}
+	}.Do(ctx, osClient)
 
-	log.S.Debug(
-		"OpenSearch index was created",
-		log.L().Add("index", config.C.Database.OpenSearch.Index),
-	)
+    bodyBytes := new(bytes.Buffer)
+    bodyBytes.ReadFrom(resp.Body)
+    log.S.Debug("resp", log.L().Add("body", bodyBytes.String()))
+
+	if err != nil {
+		log.S.Error("Failed to create OpenSearch index", log.L().Error(err))
+		return err
+	} else {
+		log.S.Debug(
+			"OpenSearch index was created",
+			log.L().Add("index", config.C.Database.OpenSearch.Index).Add("response", resp),
+		)
+	}
 
 	appcontext.Ctx = &appcontext.AppContext{
 		Clickhouse: chClient,
