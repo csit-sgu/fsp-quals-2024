@@ -79,7 +79,7 @@
     --accent: var(--color-background-soft);
     --accent-foreground: var(--color-foreground);
 
-    --primary: var(--color-foreground-soft);
+    --primary: var(--color-foreground);
     --primary-foreground: var(--color-background);
 
     --secondary: var(--color-background-mute);
