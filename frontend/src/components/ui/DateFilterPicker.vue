@@ -5,13 +5,13 @@ import { CalendarDate } from '@internationalized/date'
 import { RangeCalendar } from '@/components/ui/range-calendar'
 import type { DateRange } from 'radix-vue'
 
-const options = [
-  'Ближайшая неделя',
-  'Ближайший месяц',
-  'Ближайший квартал',
-  'Ближайшие полгода',
-  'Указать вручную',
-]
+const options = {
+  'Ближайшая неделя': '/weekly',
+  'Ближайший месяц': '/table',
+  'Ближайший квартал': '/table',
+  'Ближайшие полгода': '/table',
+  'Указать вручную': '/table',
+}
 
 const emit = defineEmits<{
   (e: 'update', value: string): void
@@ -19,28 +19,32 @@ const emit = defineEmits<{
 
 const value = ref('')
 
-const today = new Date();
-const startDate = new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate());
+const today = new Date()
+const startDate = new CalendarDate(today.getFullYear(), today.getMonth() + 1, today.getDate())
 const calendarPickedRange = ref({
   start: startDate,
   end: startDate.add({ days: 20 }),
-}) as Ref<DateRange>;
+}) as Ref<DateRange>
 
 const calendarUpdated = (range: DateRange) => {
   if (!range.start || !range.end) {
-    return;
+    return
   }
-  console.log(range.start, range.end);
-};
+  console.log(range.start, range.end)
+}
 
 const update = (newValue: string) => {
   value.value = newValue
   emit('update', newValue)
-};
+}
 </script>
 
 <template>
   <Chooser :options="options" default-msg="Выберите диапазон..." @update="update" />
-  <RangeCalendar v-if="value == 'Указать вручную'" v-model="calendarPickedRange" initial-focus
-    @update:modelValue="calendarUpdated" />
+  <RangeCalendar
+    v-if="value == 'Указать вручную'"
+    v-model="calendarPickedRange"
+    initial-focus
+    @update:modelValue="calendarUpdated"
+  />
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useRoute } from 'vue-router'
 import { Separator } from '@/components/ui/separator'
 import {
   Sidebar,
@@ -13,6 +14,8 @@ import { WeeklyView, DateFilterPicker, Chooser } from '@/components/ui'
 import { ref } from 'vue'
 
 import { sports, countries, getRegions, getLocalities, countryHasRegions } from '@/lib/dataSource'
+
+const route = useRoute()
 
 const viewMode = ref('')
 const updateViewMode = (newValue: string) => (viewMode.value = newValue)
@@ -29,7 +32,7 @@ const updateCountry = async (newValue: string) => {
     pickedCountryRegions.value = await getRegions(newValue)
   } else {
     pickedCountryRegions.value = []
-    pickedRegionLocalities.value = await getLocalities(newValue, "")
+    pickedRegionLocalities.value = await getLocalities(newValue, '')
   }
   pickedRegion.value = ''
   pickedLocality.value = ''
@@ -80,7 +83,8 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
           <div class="pt-2" />
           <Chooser
             v-if="
-              pickedRegion.length > 0 || (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
+              pickedRegion.length > 0 ||
+              (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
             "
             :show-search="true"
             :options="pickedRegionLocalities"
@@ -99,7 +103,8 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
-      <WeeklyView v-if="!viewMode || viewMode == 'Ближайшая неделя'" />
+      <WeeklyView v-if="route.path === '/weekly'" />
+      <WeeklyView v-if="route.path === '/table'" />
     </SidebarInset>
   </SidebarProvider>
 </template>
