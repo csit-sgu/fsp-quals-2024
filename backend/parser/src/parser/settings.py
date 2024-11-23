@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     ch_password: str
 
     remote_file: str
+    no_download: bool
 
     log_level: str = "INFO"
 

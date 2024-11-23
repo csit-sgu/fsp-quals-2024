@@ -36,7 +36,7 @@ def parse(filename: str) -> pd.DataFrame:
         steps.competitors_number,
         steps.competition_title,
         steps.dates,
-        steps.group,
+        steps.extract_group,
         steps.parse_group,
         steps.country,
         steps.locality,

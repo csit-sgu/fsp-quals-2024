@@ -14,18 +14,14 @@ def main():
     )
     logger.info("Successfully connected to ClickHouse")
 
-    logger.info("Downloading the remote file...")
-    # local_file = pipeline.download(settings.remote_file)
-    logger.info(
-        "PDF file has been downloaded. Parsing file's contents. "
-        + "This may take some time"
-    )
+    if settings.no_download:
+        local_file = "input.pdf"
+    else:
+        logger.info("Downloading the remote file...")
+        local_file = pipeline.download(settings.remote_file)
+        logger.info("PDF file has been downloaded")
+    logger.info("Parsing file's contents. This may take some time")
     sports = pipeline.parse(local_file)
-    df = sports[sports["Sport"] == "БАДМИНТОН"]
-    print(df.info())
-    for value in df["Parsed Group"]:
-        print(value)
-
     logger.info("Data has been parsed. Uploading to ClickHouse")
-    # ch_client.upload(sports)
+    ch_client.upload(sports)
     logger.info("Data has been uploaded")
