@@ -375,10 +375,10 @@ const docTemplate = `{
                 "country": {
                     "type": "string"
                 },
-                "date_range": {
-                    "$ref": "#/definitions/model.DateRange"
-                },
                 "email": {
+                    "type": "string"
+                },
+                "end_date": {
                     "type": "string"
                 },
                 "event_scale": {
@@ -400,6 +400,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "stage": {
+                    "type": "string"
+                },
+                "start_date": {
                     "type": "string"
                 }
             }
