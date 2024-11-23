@@ -39,11 +39,12 @@ type Pagination struct {
 type FilterCondition struct {
 	Code           string    `json:"code"            filter:"common"   ch:"code"`
 	Gender         string    `json:"gender"          filter:"common"   ch:"gender"`
+	Age            uint32    `json:"age"             filter:"inside"   ch:"age"`
 	Sport          string    `json:"sport"           filter:"common"   ch:"sport"`
 	AdditionalInfo string    `json:"additional_info" filter:"fuzzy"    ch:"additional_info"`
 	Country        string    `json:"country"         filter:"common"   ch:"country"`
 	Region         string    `json:"region"          filter:"common"   ch:"region"`
-	City           string    `json:"city"            filter:"common"   ch:"city"`
+	Locality       string    `json:"locality"        filter:"common"   ch:"locality"`
 	Stage          string    `json:"stage"           filter:"common"   ch:"stage"`
 	DateRange      DateRange `json:"date_range"      filter:"interval" ch:"start_date"`
 }

@@ -202,8 +202,8 @@ const docTemplate = `{
                 "additional_info": {
                     "type": "string"
                 },
-                "city": {
-                    "type": "string"
+                "age": {
+                    "type": "integer"
                 },
                 "code": {
                     "type": "string"
@@ -215,6 +215,9 @@ const docTemplate = `{
                     "$ref": "#/definitions/model.DateRange"
                 },
                 "gender": {
+                    "type": "string"
+                },
+                "locality": {
                     "type": "string"
                 },
                 "region": {
