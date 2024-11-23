@@ -20,6 +20,7 @@ class ClickHouse:
         logger.info("Clearing the tables")
         self.client.execute(queries.CLEAR_LOCATIONS_TABLE)
         self.client.execute(queries.CLEAR_EVENTS_TABLE)
+        self.client.execute(queries.CLEAR_AGE_RESTRICTIONS_TABLE)
         logger.info("Tables have been cleared")
 
         df["Stage"] = ""
