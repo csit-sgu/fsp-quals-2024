@@ -13,6 +13,25 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 )
 
+var viewFields = [...]string{
+	"code",
+	"start_date",
+	"country",
+	"region",
+	"locality",
+	"gender",
+	"left_bound",
+	"right_bound",
+	"title",
+	"additional_info",
+	"n_participants",
+	"stage",
+	"end_date",
+	"sport",
+	"extra_mapping",
+	"page_index",
+}
+
 func (c ClickhouseClient) buildCommonCondition(
 	key string,
 	fieldValue reflect.Value,
@@ -73,10 +92,11 @@ func (c ClickhouseClient) extractWhereParts(
 		}
 	}
 
-	query, nameField := c.getAgeRestrictionQuery(cond.Age, cond.Gender)
-
-	parts = append(parts, query)
-	namedFields = append(namedFields, nameField)
+	if !reflect.ValueOf(cond.Age).IsZero() {
+		part, nameField := c.getAgeRestrictionQuery(cond.Age, cond.Gender)
+		parts = append(parts, part)
+		namedFields = append(namedFields, nameField)
+	}
 
 	log.S.Debug("Condition parts", log.L().Add("parts", parts))
 
@@ -102,13 +122,13 @@ func (c ClickhouseClient) BuildFilterQuery(
 	cond := request.Condition
 	pagination := request.Pagination
 	if len(fields) == 0 {
-		fieldPart = "*"
+		fieldPart = strings.Join(viewFields[:], ",")
 	} else {
 		fieldPart = strings.Join(fields, ",")
 	}
 	whereClause := ""
 
-	paginationPart := "db.general_view.page_index > @page_lower AND db.general_view.page_index <= @page_upper"
+	paginationPart := "o.page_index >= @page_lower AND o.page_index <= @page_upper"
 
 	parts, namedFields := c.extractWhereParts(cond)
 	namedFields = append(
@@ -120,7 +140,6 @@ func (c ClickhouseClient) BuildFilterQuery(
 		clickhouse.Named("page_upper", (pagination.Page+1)*pagination.PageSize),
 	)
 
-    parts = append(parts, paginationPart)
 	whereParts := strings.Join(parts, " AND ")
 
 	if whereParts != "" {
@@ -129,9 +148,7 @@ func (c ClickhouseClient) BuildFilterQuery(
 		whereClause = ""
 	}
 
-	query = fmt.Sprintf(`
-       SELECT %s FROM db.general_view %s;
-    `, fieldPart, whereClause)
+	query = fmt.Sprintf(filterQuery, whereClause, fieldPart, paginationPart)
 
 	log.S.Debug("Built filter query", log.L().Add("query", query))
 
@@ -142,7 +159,7 @@ func (c ClickhouseClient) FilterEvents(
 	ctx context.Context,
 	l log.LogObject,
 	request model.FilterRequest,
-) (events []model.Event, err error) {
+) (events []*model.Event, err error) {
 	query, namedFields := c.BuildFilterQuery(request)
 
 	mapping := make(map[string]model.Event)
@@ -196,13 +213,16 @@ func (c ClickhouseClient) FilterEvents(
 				Sport:          view.Sport,
 			}
 
+			events = append(events, &event)
+
 			mapping[view.Code] = event
 		}
 	}
 
-	for _, event := range mapping {
-		events = append(events, event)
-	}
+	log.S.Debug(
+		"Events were retrieved successfully",
+		log.L().Add("count", eventViews[0]),
+	)
 
 	return events, nil
 }

@@ -23,3 +23,17 @@ const ageQuery = `
 const locationQuery = `
     SELECT DISTINCT country, region, locality FROM db.general_view WHERE code = @code
 `
+
+const filterQuery = `
+with ordered as (
+	select distinct code, row_number() over (order by start_date desc) as page_index, start_date
+	from db.events
+    %s
+	order by start_date desc
+)
+select %s
+from ordered o
+inner join db.general_view using (code)
+WHERE %s
+order by o.page_index asc
+`

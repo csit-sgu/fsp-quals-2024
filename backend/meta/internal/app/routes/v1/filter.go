@@ -26,7 +26,7 @@ func FilterData(c *gin.Context) {
 	traceId := c.GetString("trace_id")
 	ctx := c.Request.Context()
 	l := log.L().TraceId(traceId)
-	var resp []model.Event
+	var resp []*model.Event
 
 	var r model.FilterRequest
 	if err := c.ShouldBind(&r); err != nil {

@@ -4,7 +4,6 @@ import (
 	"app/internal/db/clickhouse"
 	"app/internal/model"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/assert"
 )

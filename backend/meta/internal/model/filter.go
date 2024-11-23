@@ -22,6 +22,10 @@ func (t *CustomTime) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
+func (t CustomTime) MarshalJSON() ([]byte, error) {
+	return json.Marshal(time.Time(t).Format("2006-01-02"))
+}
+
 type DateRange struct {
 	From CustomTime `json:"from"`
 	To   CustomTime `json:"to"`
