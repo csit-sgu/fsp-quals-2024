@@ -31,6 +31,11 @@ func (customTime CustomTime) String() string {
 	return time.Time(customTime).Format("2006-01-02")
 }
 
+type Pagination struct {
+	PageSize uint32 `json:"page_size"`
+	Page     uint32 `json:"page"`
+}
+
 type FilterCondition struct {
 	Code           string    `json:"code"            filter:"common"   ch:"code"`
 	Gender         string    `json:"gender"          filter:"common"   ch:"gender"`
@@ -46,4 +51,5 @@ type FilterCondition struct {
 type FilterRequest struct {
 	Condition      FilterCondition `json:"condition"`
 	RequiredFields []string        `json:"required_fields"`
+	Pagination     Pagination      `json:"pagination"`
 }

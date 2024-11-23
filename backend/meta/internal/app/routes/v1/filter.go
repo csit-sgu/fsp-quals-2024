@@ -39,8 +39,7 @@ func FilterData(c *gin.Context) {
 	resp, err := appcontext.Ctx.Clickhouse.FilterEvents(
 		ctx,
 		l,
-		r.Condition,
-		r.RequiredFields,
+		r,
 	)
 	if err != nil {
 		log.S.Error("Failed to filter events", l.Error(err))

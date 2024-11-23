@@ -234,11 +234,25 @@ const docTemplate = `{
                 "condition": {
                     "$ref": "#/definitions/model.FilterCondition"
                 },
+                "pagination": {
+                    "$ref": "#/definitions/model.Pagination"
+                },
                 "required_fields": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
+                }
+            }
+        },
+        "model.Pagination": {
+            "type": "object",
+            "properties": {
+                "page": {
+                    "type": "integer"
+                },
+                "page_size": {
+                    "type": "integer"
                 }
             }
         }

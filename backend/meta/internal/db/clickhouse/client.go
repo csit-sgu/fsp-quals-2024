@@ -97,10 +97,12 @@ func (c ClickhouseClient) extractWhereParts(
 }
 
 func (c ClickhouseClient) BuildFilterQuery(
-	cond model.FilterCondition,
-	fields []string,
+	request model.FilterRequest,
 ) (query string, namedFields []any) {
 	var fieldPart string
+	fields := request.RequiredFields
+	cond := request.Condition
+	pagination := request.Pagination
 	if len(fields) == 0 {
 		fieldPart = "*"
 	} else {
@@ -118,7 +120,18 @@ func (c ClickhouseClient) BuildFilterQuery(
 		whereClause = ""
 	}
 
-	query = "SELECT " + fieldPart + " " + "FROM db.events" + " " + whereClause + ";"
+	pagiationPart := "LIMIT @limit OFFSET @offset"
+
+	namedFields = append(
+		namedFields,
+		clickhouse.Named("offset", pagination.PageSize*pagination.Page),
+	)
+	namedFields = append(
+		namedFields,
+		clickhouse.Named("limit", pagination.PageSize),
+	)
+
+	query = "SELECT " + fieldPart + " " + "FROM db.events" + " " + whereClause + " " + pagiationPart + ";"
 	log.S.Debug("Built filter query", log.L().Add("query", query))
 
 	return query, namedFields
@@ -127,10 +140,9 @@ func (c ClickhouseClient) BuildFilterQuery(
 func (c ClickhouseClient) FilterEvents(
 	ctx context.Context,
 	l log.LogObject,
-	cond model.FilterCondition,
-	fields []string,
+	request model.FilterRequest,
 ) (events []model.Event, err error) {
-	query, namedFields := c.BuildFilterQuery(cond, fields)
+	query, namedFields := c.BuildFilterQuery(request)
 
 	mapping := make(map[string]model.Event)
 	var eventViews []model.EventView
