@@ -29,8 +29,8 @@ func (c *ClickhouseClient) SaveSubscription(
 		clickhouse.Named("locality", sub.Locality),
 		clickhouse.Named("event_type", sub.EventType),
 		clickhouse.Named("event_scale", sub.EventScale),
-		clickhouse.Named("start_date", sub.DateRange.From),
-		clickhouse.Named("end_date", sub.DateRange.To))
+		clickhouse.Named("start_date", sub.StartDate),
+		clickhouse.Named("end_date", sub.EndDate))
 	if err != nil {
 		log.S.Error(
 			"Failed to save subscription request",

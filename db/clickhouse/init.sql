@@ -86,7 +86,7 @@ CREATE TABLE db.subscriptions (
     confirmation UUID NOT NULL,
     email String NOT NULL,
     is_active Boolean NOT NULL,
-    code String NOT NULL,
+    code String,
     gender Enum('male' = 1, 'female' = 2),
     age UInt32,
     sport String,
