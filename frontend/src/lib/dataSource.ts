@@ -1,50 +1,54 @@
 import axios from 'axios'
 import { toCapitalCase } from './utils'
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'localhost:3000'
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'localhost:3000'
 
 export type Condition = {
-  additional_info?: string,
-  age?: number,
-  code?: string,
-  country?: string,
+  additional_info?: string
+  age?: number
+  code?: string
+  country?: string
   date_range?: {
-    from?: string,
+    from?: string
     to?: string
-  },
-  gender?: string,
-  locality?: string,
-  region?: string,
-  sport?: string,
-  event_type?: string,
-  event_scale?: string,
+  }
+  gender?: string
+  locality?: string
+  region?: string
+  sport?: string
+  event_type?: string
+  event_scale?: string
 }
 
 export type Competition = {
-  code: string,
-  start_date: string,
-  location_data: [{
-    country: string,
-    region: string,
-    locality: string
-  }],
-  age_data: [{
-    gender: string,
-    left_bound: number,
-    right_bound: number,
-    original: string
-  }],
-  title: string,
-  additional_info: string,
-  n_participants: number,
-  stage: string,
-  end_date: string,
+  code: string
+  start_date: string
+  location_data: [
+    {
+      country: string
+      region: string
+      locality: string
+    },
+  ]
+  age_data: [
+    {
+      gender: string
+      left_bound: number
+      right_bound: number
+      original: string
+    },
+  ]
+  title: string
+  additional_info: string
+  n_participants: number
+  stage: string
+  end_date: string
   sport: string
 }
 
 type FilterResult = {
-  events: Competition[],
-  total: number,
+  events: Competition[]
+  total: number
 }
 
 // axios.interceptors.request.use(request => {
@@ -52,22 +56,39 @@ type FilterResult = {
 //   return request
 // })
 
+export type SubscriptionRequest = {
+  additional_info?: string
+  age?: number
+  code?: string
+  country?: string
+  email: string
+  end_date?: string
+  event_scale?: string
+  event_type?: string
+  gender?: string
+  locality?: string
+  region?: string
+  sport?: string
+  stage?: string
+  start_date?: string
+}
+
 export let getEvents = async (
   page: number,
   page_size: number,
   condition: Condition = {},
-  required_fields: string[] = []
-): Promise<FilterResult> => await axios
-  .post(BACKEND_URL + '/filter',
-    {
+  required_fields: string[] = [],
+): Promise<FilterResult> =>
+  await axios
+    .post(BACKEND_URL + '/filter', {
       condition,
       pagination: {
         page,
-        page_size
+        page_size,
       },
-      required_fields
+      required_fields,
     })
-  .then((res) => res.data)
+    .then((res) => res.data)
 
 export const countryHasRegions = (country: string) => country == 'РОССИЯ'
 

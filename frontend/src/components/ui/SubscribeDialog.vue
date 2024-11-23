@@ -10,8 +10,12 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import type { SubscriptionRequest } from '@/lib/dataSource'
+import { BACKEND_URL } from '@/lib/dataSource'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
+import axios from 'axios'
+import type { AxiosResponse } from 'axios'
 
 const props = defineProps<{
   searchFilters: string[]
@@ -23,26 +27,24 @@ const updateEmail = (newValue: string | number) => {
 }
 
 const applyForSubscription = () => {
-  // TODO(aguschin): backend needs to validate given email and return whether or not
-  // subscription confirmation letter was sent successfully
-  const promise = () =>
-    new Promise<string>((resolve, reject) => {
-      setTimeout(() => {
-        console.log(userEmail.value)
-        if (userEmail.value === 'test') {
-          resolve(userEmail.value)
-        } else {
-          reject('Не удалось отправить письмо с подтверждением на указанную почту!')
-        }
-      }, 1500)
+  // TODO(aguschin): add the rest of filters
+  const subscriptionData: SubscriptionRequest = {
+    email: userEmail.value,
+  }
+
+  const trySubscribe = () =>
+    new Promise<AxiosResponse>((resolve, reject) => {
+      resolve(axios.post(`${BACKEND_URL}/subscription`, subscriptionData))
     })
-  toast.promise(promise, {
-    loading: 'Отправка подтверждения...',
-    success: (email: string) => {
-      return `Почта ${email} успешно подписана!`
+
+  toast.promise(trySubscribe, {
+    loading: 'Отправка письма с подтверждением...',
+    success: (_resp: AxiosResponse) => {
+      return `На Вашу почту отправлено письмо с подтверждением!`
     },
     error: (msg: string) => {
-      return `Ошибка: ${msg}`
+      // TODO(aguschin): show user better error messages
+      return `Произошла ошибка: ${msg}`
     },
   })
   return true
