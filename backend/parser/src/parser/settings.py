@@ -7,8 +7,9 @@ class Settings(BaseSettings):
     ch_user: str
     ch_password: str
 
+    unload_timeout: int = 300
     remote_file: str
-    no_download: bool
+    no_download: bool = False
 
     log_level: str = "INFO"
 
