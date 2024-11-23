@@ -19,20 +19,20 @@ export type Condition = {
   stage?: string
 }
 
-export type Event = {
+export type Competition = {
   code: string,
   start_date: string,
-  location_data: {
+  location_data: [{
     country: string,
     region: string,
     locality: string
-  }
-  age_data: {
+  }],
+  age_data: [{
     gender: string,
     left_bound: number,
     right_bound: number,
     original: string
-  },
+  }],
   title: string,
   additional_info: string,
   n_participants: number,
@@ -46,7 +46,7 @@ export let getEvents = async (
   page_size: number,
   condition: Condition = {},
   required_fields: string[] = []
-) => await axios
+): Promise<Competition[]> => await axios
   .post(BACKEND_URL + '/filter',
     {
       condition,

@@ -8,110 +8,17 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { Separator } from '@/components/ui/separator'
+import { type Competition } from '@/lib/dataSource'
+import { onMounted, ref, type Ref } from 'vue'
 
-const events = [
-  {
-    code: '2191860017026583',
-    start_date: '2024-07-12T00:00:00Z',
-    location_data: [
-      {
-        country: 'РОССИЯ',
-        region: '',
-        locality: 'поселок городского типа',
-      },
-    ],
-    age_data: [
-      {
-        gender: 'male',
-        left_bound: 0,
-        right_bound: 0,
-        original: '',
-      },
-    ],
-    title: 'ЧЕМПИОНАТ ФЕДЕРАЛЬНОГО ОКРУГА (УРАЛЬСКИЙ ФЕДЕРАЛЬНЫЙ ОКРУГ)',
-    additional_info: 'РИТМ - СИМУЛЯТОР, ДВОЕБОРЬЕ - ТАКТИЧЕСКАЯ СТРЕЛЬБА',
-    n_participants: 320,
-    stage: '',
-    end_date: '2024-07-15T00:00:00Z',
-    sport: '',
-  },
-  {
-    code: '2191360017026658',
-    start_date: '2024-07-22T00:00:00Z',
-    location_data: [
-      {
-        country: 'РОССИЯ',
-        region: 'ВОРОНЕЖСКАЯ ОБЛАСТЬ',
-        locality: 'г. Воронеж',
-      },
-    ],
-    age_data: [
-      {
-        gender: 'male',
-        left_bound: 0,
-        right_bound: 0,
-        original: '',
-      },
-    ],
-    title:
-      'ЧЕМПИОНАТ ФЕДЕРАЛЬНОГО ОКРУГА (ЮЖНЫЙ ФЕДЕРАЛЬНЫЙ ОКРУГ, ЦЕНТРАЛЬНЫЙ ФЕДЕРАЛЬНЫЙ ОКРУГ, СЕВЕРО- КАВКАЗСКИЙ ФЕДЕРАЛЬНЫЙ ОКРУГ)',
-    additional_info: 'РИТМ - СИМУЛЯТОР, ДВОЕБОРЬЕ - ТАКТИЧЕСКАЯ СТРЕЛЬБА',
-    n_participants: 320,
-    stage: '',
-    end_date: '2024-07-29T00:00:00Z',
-    sport: '',
-  },
-  {
-    code: '2191780017026743',
-    start_date: '2024-07-22T00:00:00Z',
-    location_data: [
-      {
-        country: 'РОССИЯ',
-        region: 'Г. САНКТ-ПЕТЕРБУРГ',
-        locality: 'Город Санкт-Петербург',
-      },
-    ],
-    age_data: [
-      {
-        gender: 'male',
-        left_bound: 0,
-        right_bound: 0,
-        original: '',
-      },
-    ],
-    title: 'ЧЕМПИОНАТ ФЕДЕРАЛЬНОГО ОКРУГА (СЕВЕРО-ЗАПАДНЫЙ ФЕДЕРАЛЬНЫЙ ОКРУГ)',
-    additional_info: 'РИТМ - СИМУЛЯТОР, ДВОЕБОРЬЕ - ТАКТИЧЕСКАЯ СТРЕЛЬБА',
-    n_participants: 320,
-    stage: '',
-    end_date: '2024-07-29T00:00:00Z',
-    sport: '',
-  },
-  {
-    code: '2191280017026581',
-    start_date: '2024-06-27T00:00:00Z',
-    location_data: [
-      {
-        country: 'РОССИЯ',
-        region: 'АМУРСКАЯ ОБЛАСТЬ',
-        locality: 'г. Благовещенск',
-      },
-    ],
-    age_data: [
-      {
-        gender: 'male',
-        left_bound: 0,
-        right_bound: 0,
-        original: '',
-      },
-    ],
-    title: 'ЧЕМПИОНАТ ФЕДЕРАЛЬНОГО ОКРУГА (ДАЛЬНЕВОСТОЧНЫЙ ФЕДЕРАЛЬНЫЙ ОКРУГ)',
-    additional_info: 'РИТМ - СИМУЛЯТОР, ДВОЕБОРЬЕ - ТАКТИЧЕСКАЯ СТРЕЛЬБА',
-    n_participants: 320,
-    stage: '',
-    end_date: '2024-06-30T00:00:00Z',
-    sport: '',
-  },
-]
+const props = defineProps<{
+  eventsPromise: Promise<Competition[]>,
+}>()
+
+const events: Ref<Competition[]> = ref([])
+onMounted(async () => {
+  events.value = await props.eventsPromise
+})
 </script>
 
 <template>
@@ -176,12 +83,12 @@ const events = [
         <TableCell>
           <div v-for="{ country, region, locality } in event.location_data" class="flex flex-col">
             <span>{{ country }},</span>
-            <span v-if="region !== null">{{ region }},</span>
+            <span v-if="region">{{ region }},</span>
             <span>{{ locality }}</span>
             <Separator v-if="event.location_data.length > 1" />
           </div>
         </TableCell>
-        <TableCell class="text-right">{{ event.n_participants }}</TableCell>
+        <TableCell class="text-center">{{ event.n_participants }}</TableCell>
       </TableRow>
     </TableBody>
   </Table>

@@ -12,10 +12,11 @@ import {
 } from '@/components/ui/sidebar'
 import { WeeklyView, DateFilterPicker, Chooser, TableView } from '@/components/ui'
 import { Button } from '@/components/ui/button'
-import { ref } from 'vue'
+import { ref, type Ref, onMounted } from 'vue'
 
 import { sports, countries, getRegions, getLocalities, countryHasRegions } from '@/lib/dataSource'
 import SidebarFooter from './components/ui/sidebar/SidebarFooter.vue'
+import { type Competition, getEvents } from '@/lib/dataSource'
 
 const route = useRoute()
 
@@ -53,6 +54,11 @@ const updateRegion = async (newValue: string) => {
 
 const pickedLocality = ref('')
 const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
+
+const events: Ref<Competition[]> = ref([])
+onMounted(async () => {
+  events.value = await getEvents(0, 10)
+})
 </script>
 
 <template>
@@ -63,58 +69,36 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
           <SidebarGroupLabel class="pt-4 pb-6">Фильтрация по дате</SidebarGroupLabel>
           <DateFilterPicker @update="updateViewMode" />
           <SidebarGroupLabel class="pt-8 pb-6">Фитрация по соревнованиям</SidebarGroupLabel>
-          <Chooser
-            :options="sports"
-            :show-search="true"
-            default-msg="Любой вид спорта"
-            @update="updateSport"
-          />
+          <Chooser :options="sports" :show-search="true" default-msg="Любой вид спорта" @update="updateSport" />
           <SidebarGroupLabel class="pt-8 pb-6">Фитрация по месту проведения</SidebarGroupLabel>
-          <Chooser
-            :options="countries"
-            :show-search="true"
-            default-msg="Любая страна"
-            @update="updateCountry"
-          />
+          <Chooser :options="countries" :show-search="true" default-msg="Любая страна" @update="updateCountry" />
           <div v-if="countryHasRegions(pickedCountry)" class="pb-2" />
-          <Chooser
-            v-if="countryHasRegions(pickedCountry)"
-            :show-search="true"
-            :options="pickedCountryRegions"
-            default-msg="Любой регион"
-            @update="updateRegion"
-          />
+          <Chooser v-if="countryHasRegions(pickedCountry)" :show-search="true" :options="pickedCountryRegions"
+            default-msg="Любой регион" @update="updateRegion" />
           <div class="pt-2" />
-          <Chooser
-            v-if="
-              pickedRegion.length > 0 ||
-              (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
-            "
-            :show-search="true"
-            :options="pickedRegionLocalities"
-            default-msg="Любой населённый пункт"
-            @update="updateLocality"
-          />
+          <Chooser v-if="
+            pickedRegion.length > 0 ||
+            (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
+          " :show-search="true" :options="pickedRegionLocalities" default-msg="Любой населённый пункт"
+            @update="updateLocality" />
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
         <Button @click="updateViewMode('table')">Применить фильтры</Button>
-        <Button variant="outline" @click="showMailSubscriptionDialog = true"
-          >Подписаться на уведомления по фильтрам</Button
-        >
+        <Button variant="outline" @click="showMailSubscriptionDialog = true">Подписаться на уведомления по
+          фильтрам</Button>
       </SidebarFooter>
     </Sidebar>
     <SidebarInset class="min-h-screen overflow-x-hidden">
       <header
-        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
-      >
+        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
       <WeeklyView v-if="route.path === '/weekly'" />
-      <TableView v-if="route.path === '/table'" />
+      <TableView :eventsPromise="getEvents(0, 10)" v-if="route.path === '/table'" />
     </SidebarInset>
   </SidebarProvider>
 </template>
