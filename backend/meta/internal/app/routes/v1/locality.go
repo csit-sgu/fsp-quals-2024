@@ -42,7 +42,7 @@ func GetCountries(c *gin.Context) {
 //	@accept		plain
 //
 //	@produce	json
-//	@param		country	query		string	true	"Query params"
+//	@param		country	query		string	true "Required country"
 //
 //	@success	200		{string}	[]string
 //

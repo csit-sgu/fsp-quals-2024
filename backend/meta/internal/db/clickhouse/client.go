@@ -12,7 +12,7 @@ type ClickhouseClient struct {
 	conn driver.Conn
 }
 
-func InitClickhouseClient(c config.DatabaseConfig) *ClickhouseClient {
+func InitClickhouseClient(c config.DatabaseConfig) (*ClickhouseClient, error) {
 	conn, err := clickhouse.Open(&clickhouse.Options{
 		Addr: []string{c.Host + ":" + c.Port},
 		Auth: clickhouse.Auth{
@@ -24,7 +24,8 @@ func InitClickhouseClient(c config.DatabaseConfig) *ClickhouseClient {
 	})
 	if err != nil {
 		log.S.Error("Failed to connect to ClickHouse", log.L().Error(err))
+        return nil, err
 	}
 
-	return &ClickhouseClient{conn}
+	return &ClickhouseClient{conn}, nil
 }

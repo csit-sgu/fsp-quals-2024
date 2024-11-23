@@ -155,6 +155,15 @@ func (c ClickhouseClient) BuildFilterQuery(
 	return query, namedFields
 }
 
+func (c ClickhouseClient) applyFuzzySearch(
+	ctx context.Context,
+	l log.LogObject,
+	searchString string,
+	e []*model.Event,
+) (events []*model.Event, err error) {
+	return e, nil
+}
+
 func (c ClickhouseClient) FilterEvents(
 	ctx context.Context,
 	l log.LogObject,
@@ -202,14 +211,14 @@ func (c ClickhouseClient) FilterEvents(
 		} else {
 			event := model.Event{
 				Code:           view.Code,
-				StartDate:      view.StartDate,
+				StartDate:      model.CustomTime(view.StartDate),
 				LocationData:   []model.LocationData{locData},
 				AgeData:        []model.AgeData{ageData},
 				Title:          view.Title,
 				AdditionalInfo: view.AdditionalInfo,
 				Participants:   view.Participants,
 				Stage:          view.Stage,
-				EndDate:        view.EndDate,
+				EndDate:        model.CustomTime(view.EndDate),
 				Sport:          view.Sport,
 			}
 
@@ -218,6 +227,8 @@ func (c ClickhouseClient) FilterEvents(
 			mapping[view.Code] = event
 		}
 	}
+
+	events, err = c.applyFuzzySearch(ctx, l, request.Condition.AdditionalInfo, events)
 
 	log.S.Debug(
 		"Events were retrieved successfully",

@@ -17,7 +17,7 @@ import (
 //	@accept		application/json
 //
 //	@produce	json
-//	@param		request	body		model.FilterRequest	true	"Query params"
+//	@param		request	body		model.FilterRequest	true	"Filter data"
 //
 //	@success	200		{string}	model.Event
 //
@@ -41,6 +41,8 @@ func FilterData(c *gin.Context) {
 		l,
 		r,
 	)
+
+	log.S.Debug("Successfully filtered events", l.Add("events", resp))
 	if err != nil {
 		log.S.Error("Failed to filter events", l.Error(err))
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)

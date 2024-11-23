@@ -32,3 +32,9 @@ database:
     password: 12345
     host: postgres
     port: 5432
+  opensearch:
+    host: localhost
+    port: 9200
+    username: user
+    password: 12345
+    index: index
