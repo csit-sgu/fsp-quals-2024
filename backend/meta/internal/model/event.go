@@ -3,9 +3,9 @@ package model
 import "time"
 
 type LocationData struct {
-	Country  string `json:"country" ch:"country"`
-	Region   string `json:"region"  ch:"region"`
-	Locality string `json:"locality"    ch:"locality"`
+	Country  string `json:"country"  ch:"country"`
+	Region   string `json:"region"   ch:"region"`
+	Locality string `json:"locality" ch:"locality"`
 }
 
 type AgeData struct {
@@ -21,6 +21,9 @@ type EventView struct {
 	Country        string    `json:"country"         ch:"country"`
 	Region         string    `json:"region"          ch:"region"`
 	Locality       string    `json:"locality"        ch:"locality"`
+	Gender         string    `json:"gender"          ch:"gender"`
+	LeftBound      uint32    `json:"left_bound"      ch:"left_bound"`
+	RightBound     uint32    `json:"right_bound"     ch:"right_bound"`
 	Title          string    `json:"title"           ch:"title"`
 	AdditionalInfo string    `json:"additional_info" ch:"additional_info"`
 	Participants   uint32    `json:"n_participants"  ch:"n_participants"`

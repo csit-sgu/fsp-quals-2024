@@ -132,6 +132,7 @@ func (c ClickhouseClient) FilterEvents(
 ) (events []model.Event, err error) {
 	query, namedFields := c.BuildFilterQuery(cond, fields)
 
+	mapping := make(map[string]model.Event)
 	var eventViews []model.EventView
 	if err = c.conn.Select(ctx, &eventViews, query, namedFields...); err != nil {
 		log.S.Error(
@@ -144,28 +145,50 @@ func (c ClickhouseClient) FilterEvents(
 	}
 
 	for i := range eventViews {
-		locationData, err := c.getLocationData(ctx, eventViews[i].Code)
-		if err != nil {
-			log.S.Warn("Failed to get location data", log.L().Add("error", err))
-			return nil, err
+		currentEvent, ok := mapping[eventViews[i].Code]
+		view := eventViews[i]
+
+		locData := model.LocationData{
+			Country:  view.Country,
+			Region:   view.Region,
+			Locality: view.Locality,
 		}
-		ageData, err := c.getAgeData(ctx, eventViews[i].Code)
-		if err != nil {
-			log.S.Warn("Failed to get age data", log.L().Add("error", err))
-			return nil, err
+		ageData := model.AgeData{
+			Gender:     view.Gender,
+			LeftBound:  view.LeftBound,
+			RightBound: view.RightBound,
+			Original:   view.ExtraMapping,
 		}
-		events = append(events, model.Event{
-			Code:           eventViews[i].Code,
-			StartDate:      eventViews[i].StartDate,
-			LocationData:   locationData,
-			AgeData:        ageData,
-			Title:          eventViews[i].Title,
-			AdditionalInfo: eventViews[i].AdditionalInfo,
-			Participants:   eventViews[i].Participants,
-			Stage:          eventViews[i].Stage,
-			EndDate:        eventViews[i].EndDate,
-			Sport:          eventViews[i].Sport,
-		})
+		if ok {
+			currentEvent.LocationData = append(
+				currentEvent.LocationData,
+				locData,
+			)
+
+			currentEvent.AgeData = append(
+				currentEvent.AgeData,
+				ageData,
+			)
+		} else {
+			event := model.Event{
+				Code:           view.Code,
+				StartDate:      view.StartDate,
+				LocationData:   []model.LocationData{locData},
+				AgeData:        []model.AgeData{ageData},
+				Title:          view.Title,
+				AdditionalInfo: view.AdditionalInfo,
+				Participants:   view.Participants,
+				Stage:          view.Stage,
+				EndDate:        view.EndDate,
+				Sport:          view.Sport,
+			}
+
+			mapping[view.Code] = event
+		}
+	}
+
+	for _, event := range mapping {
+		events = append(events, event)
 	}
 
 	return events, nil

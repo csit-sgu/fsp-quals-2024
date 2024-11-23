@@ -1,12 +1,34 @@
 package model
 
 import (
+	"encoding/json"
 	"time"
 )
 
+const DateFormat = "2006-01-02 00:00:00.000000"
+
+type CustomTime time.Time
+
+func (t *CustomTime) UnmarshalJSON(b []byte) error {
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	tt, err := time.Parse(time.DateOnly, s)
+	if err != nil {
+		return err
+	}
+	*t = CustomTime(tt)
+	return nil
+}
+
 type DateRange struct {
-	From time.Time `json:"from"`
-	To   time.Time `json:"to"`
+	From CustomTime `json:"from"`
+	To   CustomTime `json:"to"`
+}
+
+func (customTime CustomTime) String() string {
+	return time.Time(customTime).Format("2006-01-02")
 }
 
 type FilterCondition struct {

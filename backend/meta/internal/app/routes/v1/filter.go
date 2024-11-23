@@ -27,7 +27,6 @@ func FilterData(c *gin.Context) {
 	ctx := c.Request.Context()
 	l := log.L().TraceId(traceId)
 	var resp []model.Event
-	defer c.JSON(http.StatusOK, &resp)
 
 	var r model.FilterRequest
 	if err := c.ShouldBind(&r); err != nil {
@@ -48,4 +47,6 @@ func FilterData(c *gin.Context) {
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)
 		return
 	}
+
+	c.JSON(http.StatusOK, &resp)
 }
