@@ -8,6 +8,7 @@ type Config struct {
 	Log         LogConfig    `yaml:"log"`
 	Server      ServerConfig `yaml:"server"`
 	Database    Databases    `yaml:"database"`
+	Mail        MailConfig   `yaml:"mail"`
 }
 
 type ServerConfig struct {

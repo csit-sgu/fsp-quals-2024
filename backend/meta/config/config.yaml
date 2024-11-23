@@ -19,6 +19,17 @@ log:
     level_encoder: lowercase
     time_key: timestamp
     time_encoder: iso8601
+mail:
+  host: smtp.mail.ru
+  port: 465
+  username: user
+  password: pass
+  subject: Zero-Cost Developers Уведомления
+  body: |
+    Перейдите по ссылке в этом письме, если согласны получать уведомления
+    об интересующих Вас мероприятиях платформы от команды Zero-Cost Developers:
+
+    https://cc.alivetech.org/s/rick
 database:
   clickhouse:
     name: db

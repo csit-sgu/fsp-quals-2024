@@ -6,7 +6,9 @@ import (
 	"app/internal/app/appcontext"
 	"app/internal/app/ckey"
 	"app/internal/app/errors"
+	"app/internal/config"
 	"app/internal/log"
+	"app/internal/mail"
 	"app/internal/model"
 
 	"github.com/gin-gonic/gin"
@@ -59,6 +61,15 @@ func PostSubscription(c *gin.Context) {
 		return
 	}
 	body.Confirmation = uid
+
+	err = mail.SendEmail(body.Email, config.C.Mail.Subject, config.C.Mail.Body)
+	if err != nil {
+		log.S.Info("Failed to send an email", l.Error(err))
+		_ = c.Error(errors.E().Code(errors.CodeBadInput).TraceId(traceId).Message("Failed to send a confirmation email").Build()).
+			SetType(gin.ErrorTypePublic)
+		c.Abort()
+		return
+	}
 
 	if err := appcontext.Ctx.Clickhouse.SaveSubscription(ctx, body); err != nil {
 		log.S.Error("Failed to submit subscription", l.Error(err))
