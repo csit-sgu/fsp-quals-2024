@@ -82,10 +82,9 @@
     --primary: var(--color-foreground-soft);
     --primary-foreground: var(--color-background);
 
-    /* TODO(aguschin): where is this used? */
-    --secondary: red;
-    --secondary-foreground: red;
-    
+    --secondary: var(--color-background-mute);
+    --secondary-foreground: var(--color-foreground);
+
     /* TODO(aguschin): where is this used? */
     --destructive: red;
     --destructive-foreground: red;

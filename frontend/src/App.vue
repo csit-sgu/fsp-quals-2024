@@ -11,12 +11,15 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar'
 import { WeeklyView, DateFilterPicker, Chooser } from '@/components/ui'
+import { Button } from '@/components/ui/button'
 import { ref } from 'vue'
 
 import { sports, countries, getRegions, getLocalities, countryHasRegions } from '@/lib/dataSource'
 import SidebarFooter from './components/ui/sidebar/SidebarFooter.vue'
 
 const route = useRoute()
+
+const showMailSubscriptionDialog = ref(false)
 
 const viewMode = ref('')
 const updateViewMode = (newValue: string) => (viewMode.value = newValue)
@@ -74,6 +77,11 @@ const updateLocality = (newValue: string) => (pickedLocality.value = newValue)
             @update="updateLocality" />
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <Button @click="updateViewMode('table')">Применить фильтры</Button>
+        <Button variant="outline" @click="showMailSubscriptionDialog = true">Подписаться на уведомления по
+          фильтрам</Button>
+      </SidebarFooter>
     </Sidebar>
     <SidebarInset class="min-h-screen overflow-x-hidden">
       <header
