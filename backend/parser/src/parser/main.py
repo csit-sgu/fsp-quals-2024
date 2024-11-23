@@ -15,12 +15,11 @@ def main():
     logger.info("Successfully connected to ClickHouse")
 
     logger.info("Downloading the remote file...")
-    # local_file = pipeline.download(settings.remote_file)
+    local_file = pipeline.download(settings.remote_file)
     logger.info(
         "PDF file has been downloaded. Parsing file's contents. "
         + "This may take some time"
     )
-    local_file = "input.pdf"
     sports = pipeline.parse(local_file)
     logger.info("Data has been parsed. Uploading to ClickHouse")
     ch_client.upload(sports)

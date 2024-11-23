@@ -5,7 +5,7 @@ import pandas as pd
 from parser import util
 
 PAGE_NUM = r"Стр\.\s*\d+\s*из\s*\d+"
-SPORT_KIND = r"([А-Я\-\s]+)Основной\s+состав\s"
+SPORT_KIND = r"([а-яА-Я\-\s]+)Основной\s+состав\s"
 RESERVE_SECTION = r"Молодежный\s+\(резервный\)\s+состав"
 CODE = r"\d{10,}"
 ROW_START = rf"\s(?={CODE}\s)"
@@ -15,7 +15,6 @@ COMPETITION_TITLE_AFTER = r"(?=\s+[а-я])"
 DATE = r"\d{2}\.\d{2}\.\d{4}"
 DATES_BEFORE = rf"\s(?={DATE}\s{DATE})"
 DATES_AFTER = rf"(?<={DATE}\s{DATE})\s"
-UPPERCASE_RUS = r"[А-Я]"
 DISCIPLINE_BEFORE = r"\s?(?=[А-Я]|$)"
 REGION_NAME = r"([^,]+),\s+"
 
