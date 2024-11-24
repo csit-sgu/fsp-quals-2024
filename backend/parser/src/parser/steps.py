@@ -8,7 +8,7 @@ from parser.log import logger
 
 PAGE_NUM = re.compile(r"Стр\.\s*\d+\s*из\s*\d+")
 # NOTE(evgenymng): this is an impostor Ë
-SPORT_KIND = re.compile(r"([а-яА-ЯЁ\(\)\-\s]+)Основной\s+состав\s")
+SPORT_KIND = re.compile(r"([А-ЯЁ][а-яА-ЯЁ\(\)\-\s]*)Основной\s+состав\s")
 RESERVE_SECTION = re.compile(r"Молодежный\s+\(резервный\)\s+состав")
 ROW_START = re.compile(r"\s(?=\d{10,}\s)")
 COMPETITORS_NUMBER = re.compile(r"\s+(?=\d+$)")
