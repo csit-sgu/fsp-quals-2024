@@ -42,9 +42,8 @@ const applyForSubscription = () => {
     success: (_resp: AxiosResponse) => {
       return `На Вашу почту отправлено письмо с подтверждением!`
     },
-    error: (msg: string) => {
-      // TODO(aguschin): show user better error messages
-      return `Произошла ошибка: ${msg}`
+    error: (resp: AxiosResponse) => {
+      return `Произошла ошибка: ${resp.data.message || resp.toString()}`
     },
   })
   return true

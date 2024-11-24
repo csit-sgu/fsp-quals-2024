@@ -9,7 +9,7 @@ import utc from 'dayjs/plugin/utc'
 import type { Competition } from '@/lib/dataSource'
 
 const props = defineProps<{
-  events: Competition[],
+  events: Competition[]
   beginDay?: string
 }>()
 const events = props.events
