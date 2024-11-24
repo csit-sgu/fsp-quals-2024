@@ -25,7 +25,7 @@ func Notify(c *gin.Context) {
 	ctx := c.Request.Context()
 	l := log.L().TraceId(traceId)
 
-    r := model.NotifyRequest{}
+	r := model.NotifyRequest{}
 	if err := c.ShouldBind(&r); err != nil {
 		log.S.Error("Failed to bind query", l.Error(err))
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)

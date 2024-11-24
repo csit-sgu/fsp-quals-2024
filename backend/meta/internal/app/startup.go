@@ -32,7 +32,7 @@ func onStartup(ctx context.Context) error {
 		return err
 	}
 
-    settings := strings.NewReader(`{
+	settings := strings.NewReader(`{
         "settings": {
             "number_of_shards": 1,
             "number_of_replicas": 0,
@@ -78,14 +78,14 @@ func onStartup(ctx context.Context) error {
             }
         }
     }`)
-    resp, err := opensearchapi.IndicesCreateRequest{
+	resp, err := opensearchapi.IndicesCreateRequest{
 		Index: config.C.Database.OpenSearch.Index,
 		Body:  settings,
 	}.Do(ctx, osClient)
 
-    bodyBytes := new(bytes.Buffer)
-    bodyBytes.ReadFrom(resp.Body)
-    log.S.Debug("resp", log.L().Add("body", bodyBytes.String()))
+	bodyBytes := new(bytes.Buffer)
+	bodyBytes.ReadFrom(resp.Body)
+	log.S.Debug("resp", log.L().Add("body", bodyBytes.String()))
 
 	if err != nil {
 		log.S.Error("Failed to create OpenSearch index", log.L().Error(err))

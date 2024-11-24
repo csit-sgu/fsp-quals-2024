@@ -17,26 +17,44 @@ const localityQuery = `
 `
 
 const filterQuery = `
-with ordered as (
-	select distinct code, row_number() over (order by start_date desc) as page_index, start_date
+with country_view as (
+    select distinct country, region, locality, code from db.location_restrictions %s
+),
+age_view as (
+    select distinct left_bound, right_bound, gender, code, extra_mapping from db.age_restrictions %s
+),
+ordered as (
+	select distinct code, row_number() over (order by start_date desc) as page_index, start_date, title, additional_info, event_type, event_scale, n_participants, end_date, sport
 	from db.events %s
 	order by start_date desc
 )
 select %s
 from ordered o
-inner join db.general_view using (code)
-WHERE %s
-order by o.page_index asc
+inner join country_view cv on cv.code = o.code
+inner join age_view av on av.code = o.code %s
+order by page_index asc
 `
 
 const filterCounterQuery = `
-with ordered as (
-	select distinct code, row_number() over (order by start_date desc) as page_index, start_date
+with country_view as (
+    select distinct country, region, locality, code from db.location_restrictions %s
+),
+age_view as (
+    select distinct left_bound, right_bound, gender, code, extra_mapping from db.age_restrictions %s
+),
+ordered as (
+	select distinct code, row_number() over (order by start_date desc) as page_index, start_date, title, additional_info, event_type, event_scale, n_participants, end_date, sport
 	from db.events %s
 	order by start_date desc
+),
+available as (
+    select distinct o.code
+    from ordered o
+    inner join country_view cv on cv.code = o.code
+    inner join age_view av on av.code = o.code
+    order by page_index asc
 )
-select count() as count
-from ordered o
+select count() as count from available;
 `
 
 const codeQuery = `

@@ -16,7 +16,7 @@ type AgeData struct {
 }
 
 type EventView struct {
-	Code           string    `json:"code"            ch:"code"`
+	Code           string    `json:"code"            ch:"o.code"`
 	StartDate      time.Time `json:"start_date"      ch:"start_date"`
 	Country        string    `json:"country"         ch:"country"`
 	Region         string    `json:"region"          ch:"region"`
@@ -27,10 +27,11 @@ type EventView struct {
 	Title          string    `json:"title"           ch:"title"`
 	AdditionalInfo string    `json:"additional_info" ch:"additional_info"`
 	Participants   uint32    `json:"n_participants"  ch:"n_participants"`
-	Stage          string    `json:"stage"           ch:"stage"`
 	EndDate        time.Time `json:"end_date"        ch:"end_date"`
 	Sport          string    `json:"sport"           ch:"sport"`
 	ExtraMapping   string    `json:"extra_mapping"   ch:"extra_mapping"`
+	EventScale     string    `json:"event_scale"     ch:"event_scale"`
+	EventType      string    `json:"event_type"      ch:"event_type"`
 	PageIndex      uint64    `json:"page_index"      ch:"page_index"`
 }
 

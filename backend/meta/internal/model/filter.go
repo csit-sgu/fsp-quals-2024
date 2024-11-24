@@ -41,15 +41,15 @@ type Pagination struct {
 }
 
 type FilterCondition struct {
-	Code           string    `json:"code"            filter:"common"   ch:"code"`
+	Code           string    `json:"code"            filter:"common"   ch:"o.code"`
 	Gender         string    `json:"gender"          filter:"common"   ch:"gender"`
 	Age            uint32    `json:"age"             filter:"inside"   ch:"age"`
 	Sport          string    `json:"sport"           filter:"common"   ch:"sport"`
+	Title          string    `json:"title"           filter:"fuzzy"    ch:"title"`
 	AdditionalInfo string    `json:"additional_info" filter:"fuzzy"    ch:"additional_info"`
 	Country        string    `json:"country"         filter:"common"   ch:"country"`
 	Region         string    `json:"region"          filter:"common"   ch:"region"`
 	Locality       string    `json:"locality"        filter:"common"   ch:"locality"`
-	Stage          string    `json:"stage"           filter:"common"   ch:"stage"`
 	EventType      string    `json:"event_type"      filter:"common"   ch:"event_type"`
 	EventScale     string    `json:"event_scale"     filter:"common"   ch:"event_scale"`
 	DateRange      DateRange `json:"date_range"      filter:"interval" ch:"start_date"`
@@ -62,8 +62,8 @@ type FilterRequest struct {
 }
 
 type FilterResponse struct {
-	Events     []*Event `json:"events"`
-	Total uint64   `json:"total"`
+	Events []*Event `json:"events"`
+	Total  uint64   `json:"total"`
 }
 
 type FilterView struct {

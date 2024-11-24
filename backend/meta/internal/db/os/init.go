@@ -1,10 +1,11 @@
 package os
 
 import (
-	"app/internal/config"
 	"crypto/tls"
 	"fmt"
 	"net/http"
+
+	"app/internal/config"
 
 	"github.com/opensearch-project/opensearch-go"
 )
@@ -14,7 +15,7 @@ func InitOpenSearchClient(
 ) (*opensearch.Client, error) {
 	return opensearch.NewClient(opensearch.Config{
 		Addresses: []string{
-            fmt.Sprintf("https://%s:%s", c.Host, c.Port),
+			fmt.Sprintf("https://%s:%s", c.Host, c.Port),
 		},
 		Username: c.Username,
 		Password: c.Password,

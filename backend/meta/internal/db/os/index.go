@@ -9,6 +9,7 @@ import (
 	"app/internal/model"
 
 	"github.com/opensearch-project/opensearch-go"
+	"github.com/opensearch-project/opensearch-go/opensearchapi"
 )
 
 type OpenSearch struct {
@@ -19,6 +20,7 @@ type OpenSearch struct {
 func (c *OpenSearch) convertToQuery(index []model.IndexData) string {
 	query := ""
 	for i := range index {
+		log.S.Debug("Index data", log.L().Add("data", index[i]))
 		query += fmt.Sprintf(
 			"{\"index\":{\"_index\":\"%s\",\"_id\":\"%s\"}}\n",
 			c.Index,
@@ -38,10 +40,32 @@ func (c *OpenSearch) IndexData(
 	l log.LogObject,
 	indexData []model.IndexData,
 ) error {
-	query := c.convertToQuery(indexData)
+	for i := range indexData {
+		log.S.Debug("Index data", log.L().Add("data", indexData[i]))
 
-	log.S.Debug("Built query for bulk request", l.Add("query", query))
-	c.Client.Bulk(strings.NewReader(query))
-	log.S.Debug("Bulk request was sent successfully", l)
+		req := opensearchapi.IndexRequest{
+			Index: c.Index,
+			Body: strings.NewReader(fmt.Sprintf(
+				"{\"title\":\"%s\",\"additional_info\":\"%s\"}",
+				indexData[i].Title,
+				indexData[i].AdditionalInfo,
+			)),
+			DocumentID: indexData[i].Code,
+		}
+
+		_, err := req.Do(ctx, c.Client)
+		if err != nil {
+			log.S.Error(
+				"Failed to index data",
+				log.L().
+					Add("index", c.Index).
+					Add("code", indexData[i].Code).
+					Error(err),
+			)
+			return err
+		}
+	}
+
+	log.S.Debug("Index request was completed", l)
 	return nil
 }

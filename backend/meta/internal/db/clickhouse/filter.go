@@ -10,11 +10,10 @@ import (
 	"app/internal/model"
 
 	"github.com/ClickHouse/clickhouse-go/v2"
-	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 )
 
 var viewFields = [...]string{
-	"code",
+	"o.code",
 	"start_date",
 	"country",
 	"region",
@@ -25,82 +24,12 @@ var viewFields = [...]string{
 	"title",
 	"additional_info",
 	"n_participants",
-	"stage",
 	"end_date",
 	"sport",
 	"extra_mapping",
 	"page_index",
-}
-
-func (c ClickhouseClient) buildCommonCondition(
-	key string,
-	fieldValue reflect.Value,
-	fieldType string,
-) (string, []any) {
-	switch fieldType {
-	case "common":
-		return fmt.Sprintf(
-				"%s = @%s",
-				key,
-				key,
-			), []any{
-				driver.NamedValue{Name: key, Value: fieldValue},
-			}
-	case "interval":
-		return fmt.Sprintf(
-				"%s BETWEEN @%s_from AND @%s_to",
-				key,
-				key,
-				key,
-			), []any{
-				driver.NamedValue{
-					Name:  key + "_from",
-					Value: fieldValue.FieldByName("From").Interface(),
-				},
-				driver.NamedValue{
-					Name:  key + "_to",
-					Value: fieldValue.FieldByName("To").Interface(),
-				},
-			}
-	default:
-		return "", nil
-	}
-}
-
-func (c ClickhouseClient) extractWhereParts(
-	cond model.FilterCondition,
-) (parts []string, namedFields []any) {
-	t := reflect.TypeOf(cond)
-	v := reflect.ValueOf(cond)
-	for i := 0; i < t.NumField(); i++ {
-		key := t.Field(i).Tag.Get("ch")
-		if !v.Field(i).IsZero() {
-			fieldType := t.Field(i).Tag.Get("filter")
-			part, newFields := c.buildCommonCondition(
-				key,
-				v.Field(i),
-				fieldType,
-			)
-			if part == "" {
-				continue
-			}
-			log.S.Debug("Condition part", log.L().Add("part", part))
-			if part != "" {
-				parts = append(parts, part)
-				namedFields = append(namedFields, newFields...)
-			}
-		}
-	}
-
-	if !reflect.ValueOf(cond.Age).IsZero() {
-		part, nameField := c.getAgeRestrictionQuery(cond.Age, cond.Gender)
-		parts = append(parts, part)
-		namedFields = append(namedFields, nameField)
-	}
-
-	log.S.Debug("Condition parts", log.L().Add("parts", parts))
-
-	return parts, namedFields
+    "event_type",
+    "event_scale",
 }
 
 func (c ClickhouseClient) getAgeRestrictionQuery(
@@ -114,45 +43,153 @@ func (c ClickhouseClient) getAgeRestrictionQuery(
 		)
 }
 
-func (c ClickhouseClient) BuildFilterQuery(
-	request model.FilterRequest,
-) (query string, namedFields []any, whereClause string) {
-	var fieldPart string
-	fields := request.RequiredFields
-	cond := request.Condition
-	pagination := request.Pagination
-	if len(fields) == 0 {
-		fieldPart = strings.Join(viewFields[:], ",")
-	} else {
-		fieldPart = strings.Join(fields, ",")
+func (c ClickhouseClient) buildPart(
+	structField reflect.StructField,
+	fieldValue reflect.Value,
+) (part string, namedFields []any) {
+	chTag := structField.Tag.Get("ch")
+	filterTag := structField.Tag.Get("filter")
+
+	switch filterTag {
+	case "common":
+		return fmt.Sprintf(
+				"%s = @%s",
+				chTag,
+				chTag,
+			), []any{
+				clickhouse.Named(chTag,fieldValue.Interface()),
+			}
+	case "interval":
+		return fmt.Sprintf(
+				"%s BETWEEN @%s_from AND @%s_to",
+				chTag,
+				chTag,
+				chTag,
+			), []any{
+				clickhouse.Named(chTag+"_from", fieldValue.FieldByName("From").Interface()),
+				clickhouse.Named(chTag+"_to", fieldValue.FieldByName("To").Interface()),
+			}
+	case "inside":
+		return fmt.Sprintf(
+				"@%s >= left_bound AND @%s <= right_bound",
+				chTag,
+				chTag,
+			), []any{
+                clickhouse.Named(chTag, fieldValue.Interface()),
+			}
 	}
-	whereClause = ""
+	return part, namedFields
+}
 
-	paginationPart := "o.page_index >= @page_lower AND o.page_index <= @page_upper"
+func (c ClickhouseClient) buildWhereClause(
+	cond model.FilterCondition,
+	fieldNames []string,
+) (whereClause string, namedFields []any) {
+	var parts []string
+	for _, fieldName := range fieldNames {
 
-	parts, namedFields := c.extractWhereParts(cond)
-	namedFields = append(
-		namedFields,
-		clickhouse.Named("page_lower", pagination.Page*pagination.PageSize),
-	)
-	namedFields = append(
-		namedFields,
-		clickhouse.Named("page_upper", (pagination.Page+1)*pagination.PageSize),
-	)
+		structField, ok := reflect.TypeOf(cond).FieldByName(fieldName)
+		log.S.Debug("Struct field", log.L().Add("field", structField))
+		if !ok {
+			panic("This should not ever happen")
+		}
+		// get field value
+		fieldValue := reflect.ValueOf(cond).FieldByName(fieldName)
 
-	whereParts := strings.Join(parts, " AND ")
+		if !fieldValue.IsZero() {
+			part, newFields := c.buildPart(structField, fieldValue)
 
-	if whereParts != "" {
-		whereClause = "WHERE " + whereParts
+			parts = append(parts, part)
+			namedFields = append(namedFields, newFields...)
+		}
+
+		log.S.Debug("Field parts", log.L().Add("parts", parts))
+		log.S.Debug("Field named fields", log.L().Add("namedFields", namedFields))
+	}
+
+	if len(parts) > 0 {
+		whereClause = "WHERE "
+		log.S.Debug("Where clause", log.L().Add("whereClause", parts))
 	} else {
 		whereClause = ""
 	}
+	whereClause += strings.Join(parts, " AND ")
+	return whereClause, namedFields
+}
 
-	query = fmt.Sprintf(filterQuery, whereClause, fieldPart, paginationPart)
+var commonFields = []string{
+	"Code",
+	"EventScale",
+	"EventType",
+	"Sport",
+}
 
-	log.S.Debug("Built filter query", log.L().Add("query", query))
+var locationFields = []string{
+	"Country",
+	"Region",
+	"Locality",
+}
 
-	return query, namedFields, whereClause
+var ageFields = []string{
+	"Age",
+	"Gender",
+}
+
+func (c ClickhouseClient) BuildFilterQuery(
+	request model.FilterRequest,
+) (query string, countQuery string, namedFields []any) {
+	pagination := request.Pagination
+	selectFields := request.RequiredFields
+	cond := request.Condition
+	var selectPart string
+	if len(selectFields) == 0 {
+		selectPart = strings.Join(viewFields[:], ",")
+	} else {
+		selectPart = strings.Join(selectFields, ",")
+	}
+
+	commonWhere, commonNamedFields := c.buildWhereClause(cond, commonFields)
+	locationWhere, locationNamedFields := c.buildWhereClause(cond, locationFields)
+	ageWhere, ageNamedFields := c.buildWhereClause(cond, ageFields)
+
+	namedFields = append(
+		namedFields,
+		commonNamedFields...,
+	)
+	namedFields = append(
+		namedFields,
+		locationNamedFields...,
+	)
+	namedFields = append(
+		namedFields,
+		ageNamedFields...,
+	)
+	namedFields = append(
+		namedFields,
+		clickhouse.Named("page_lower", pagination.Page*pagination.PageSize),
+		clickhouse.Named("page_upper", (pagination.Page+1)*pagination.PageSize),
+	)
+
+	paginationPart := "WHERE page_index >= @page_lower AND page_index <= @page_upper"
+
+	query = fmt.Sprintf(
+		filterQuery,
+		locationWhere,
+		ageWhere,
+		commonWhere,
+		selectPart,
+		paginationPart,
+	)
+	log.S.Debug("Built filter query", log.L().Add("query", query).Add("namedFields", namedFields))
+
+	countQuery = fmt.Sprintf(
+		filterCounterQuery,
+		locationWhere,
+		ageWhere,
+		commonWhere,
+	)
+
+	return query, countQuery, namedFields
 }
 
 func (c ClickhouseClient) GetIndexData(
@@ -161,9 +198,8 @@ func (c ClickhouseClient) GetIndexData(
 	request model.NotifyRequest,
 ) (indexData []model.IndexData, err error) {
 	query := codeQuery
-	arg := clickhouse.Named("codes", &request)
 
-	if err = c.conn.Select(ctx, &indexData, query, arg); err != nil {
+	if err = c.conn.Select(ctx, &indexData, query); err != nil {
 		log.S.Error(
 			"Failed to execute index query",
 			log.L().Add("query", query).Error(err),
@@ -179,7 +215,6 @@ func (c ClickhouseClient) GetIndexData(
 	return indexData, nil
 }
 
-
 type Count struct {
 	Count uint64 `ch:"count"`
 }
@@ -189,7 +224,7 @@ func (c ClickhouseClient) FilterEvents(
 	l log.LogObject,
 	request model.FilterRequest,
 ) (response model.FilterResponse, err error) {
-	query, namedFields, whereClause := c.BuildFilterQuery(request)
+	query, countQuery, namedFields := c.BuildFilterQuery(request)
 
 	mapping := make(map[string]model.Event)
 	filterView := model.FilterView{}
@@ -198,16 +233,13 @@ func (c ClickhouseClient) FilterEvents(
 	if err = c.conn.Select(ctx, &eventViews, query, namedFields...); err != nil {
 		log.S.Error(
 			"Failed to execute filter query",
-			log.L().Add("query", query).Add("error", err),
+			log.L().Add("query", query).Error(err),
 		)
 		return model.FilterResponse{}, err
 	} else {
 		log.S.Debug("Events were retrieved successfully", l.Add("count", len(eventViews)))
 	}
-	if err = c.conn.Select(ctx, &total, fmt.Sprintf(
-		filterCounterQuery,
-		whereClause,
-	), namedFields...); err != nil {
+	if err = c.conn.Select(ctx, &total, countQuery, namedFields...); err != nil {
 		log.S.Error(
 			"Failed to execute filter counter query",
 			log.L().Add("query", filterCounterQuery).Add("error", err),
@@ -250,7 +282,6 @@ func (c ClickhouseClient) FilterEvents(
 				Title:          view.Title,
 				AdditionalInfo: view.AdditionalInfo,
 				Participants:   view.Participants,
-				Stage:          view.Stage,
 				EndDate:        model.CustomTime(view.EndDate),
 				Sport:          view.Sport,
 			}

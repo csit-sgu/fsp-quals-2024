@@ -327,7 +327,7 @@ const docTemplate = `{
                 "sport": {
                     "type": "string"
                 },
-                "stage": {
+                "title": {
                     "type": "string"
                 }
             }
