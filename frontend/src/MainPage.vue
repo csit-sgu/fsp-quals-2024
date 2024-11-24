@@ -281,6 +281,12 @@ const getFilters = (): Condition => {
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
+          <a
+            href="https://minsport.gov.ru/activity/government-regulation/edinyj-kalendarnyj-plan/"
+            class="text-blue-500"
+          >
+            Перейти на сайт календарного плана Минспорта
+          </a>
         </div>
       </header>
       <WeeklyView
