@@ -46,4 +46,5 @@ type Event struct {
 	Stage          string         `json:"stage"           ch:"stage"`
 	EndDate        CustomTime     `json:"end_date"        ch:"end_date"`
 	Sport          string         `json:"sport"           ch:"sport"`
+	Score          float64         `json:"-"`
 }

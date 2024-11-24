@@ -35,12 +35,12 @@ merged as (
 	inner join age_view av on av.code = o.code
 ),
 paginated as (
-	select code, start_date as d, (dense_rank() over (order by start_date desc)) as page_index from merged group by code, start_date order by d desc
+	select code, start_date as d, (dense_rank() over (order by (start_date, code) desc)) as page_index from merged group by code, start_date order by d desc
 ),
 selected as (
 	select code, page_index from paginated p %s
 )
-select %s from merged
+select distinct %s from merged
 inner join selected using (code)
 `
 

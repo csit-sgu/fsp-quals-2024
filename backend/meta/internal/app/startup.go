@@ -33,51 +33,62 @@ func onStartup(ctx context.Context) error {
 	}
 
 	settings := strings.NewReader(`{
-        "settings": {
-            "number_of_shards": 1,
-            "number_of_replicas": 0,
-            "analysis": {
-                "filter": {
-                    "russian_stop": {
-                      "type": "stop",
-                      "stopwords": "_russian_"
-                    },
-                    "russian_stemmer": {
-                      "type": "stemmer",
-                      "language": "russian"
-                    },
-                    "russian_keywords": {
-                      "type": "keyword_marker",
-                      "keywords": []
-                    }
+    "settings": {
+        "number_of_shards": 1,
+        "number_of_replicas": 0,
+        "analysis": {
+            "filter": {
+                "russian_stop": {
+                    "type": "stop",
+                    "stopwords": "_russian_"
                 },
-                "analyzer": {
-                    "russian_analyzer": {
-                        "type": "custom",
-                        "tokenizer": "standard",
-                        "filter": [
-                            "lowercase",
-                            "russian_stop",
-                            "russian_stemmer",
-                            "russian_keywords"
-                        ]
-                    }
+                "russian_stemmer": {
+                    "type": "stemmer",
+                    "language": "russian"
+                },
+                "russian_keywords": {
+                    "type": "keyword_marker",
+                    "keywords": []
                 }
-            }
-        },
-        "mappings": {
-            "properties": {
-                "title": {
-                    "type": "text",
-                    "analyzer": "russian_analyzer"
-                },
-                "additional_info": {
-                    "type": "text",
-                    "analyzer": "russian_analyzer"
+            },
+            "tokenizer": {
+                "russian_ngram": {
+                    "type": "ngram",
+                    "min_gram": 3,
+                    "max_gram": 4
+                }
+            },
+            "analyzer": {
+                "russian_analyzer": {
+                    "type": "custom",
+                    "tokenizer": "russian_ngram",
+                    "filter": [
+                        "lowercase",
+                        "russian_stop",
+                        "russian_stemmer",
+                        "russian_keywords"
+                    ]
                 }
             }
         }
-    }`)
+    },
+    "mappings": {
+        "properties": {
+            "title": {
+                "type": "text",
+                "analyzer": "russian_analyzer"
+            },
+            "additional_info": {
+                "type": "text",
+                "analyzer": "russian_analyzer"
+            },
+            "code": {
+                "type": "text",
+                "analyzer": "standard"
+            }
+        }
+    }
+}`)
 	resp, err := opensearchapi.IndicesCreateRequest{
 		Index: config.C.Database.OpenSearch.Index,
 		Body:  settings,

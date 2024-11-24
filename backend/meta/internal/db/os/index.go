@@ -27,9 +27,10 @@ func (c *OpenSearch) convertToQuery(index []model.IndexData) string {
 			index[i].Code,
 		)
 		query += fmt.Sprintf(
-			"{\"title\":\"%s\",\"additional_info\":\"%s\"}\n",
+			"{\"title\":\"%s\",\"additional_info\":\"%s\", \"code\":\"%s\"}\n",
 			index[i].Title,
 			index[i].AdditionalInfo,
+			index[i].Code,
 		)
 	}
 	return query
@@ -46,13 +47,13 @@ func (c *OpenSearch) IndexData(
 		req := opensearchapi.IndexRequest{
 			Index: c.Index,
 			Body: strings.NewReader(fmt.Sprintf(
-				"{\"title\":\"%s\",\"additional_info\":\"%s\"}",
+				"{\"title\":\"%s\",\"additional_info\":\"%s\", \"code\":\"%s\"}\n",
 				indexData[i].Title,
 				indexData[i].AdditionalInfo,
+				indexData[i].Code,
 			)),
 			DocumentID: indexData[i].Code,
 		}
-
 
 		resp, err := req.Do(ctx, c.Client)
 
@@ -64,10 +65,10 @@ func (c *OpenSearch) IndexData(
 					Add("code", indexData[i].Code).
 					Error(err),
 			)
-            continue
+			continue
 		}
 
-        resp.Body.Close()
+		resp.Body.Close()
 	}
 
 	log.S.Debug("Index request was completed", l)

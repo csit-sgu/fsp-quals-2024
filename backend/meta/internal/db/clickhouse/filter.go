@@ -121,6 +121,7 @@ var commonFields = []string{
 	"EventScale",
 	"EventType",
 	"Sport",
+    "DateRange",
 }
 
 var locationFields = []string{

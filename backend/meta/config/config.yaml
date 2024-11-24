@@ -5,7 +5,7 @@ enable_pprof: true
 server:
   mode: debug
   host: 0.0.0.0
-  port: 3001
+  port: 3002
   shutdown_timeout: 10
 log:
   level: debug
@@ -25,7 +25,7 @@ mail:
   username: user
   password: pass
   subject: Zero-Cost Developers Уведомления
-  body: |    
+  body: |
     <!DOCTYPE html>
     <html lang="ru">
     <head>
@@ -38,7 +38,7 @@ mail:
             <h2 style="color: #555;">Подтверждение уведомлений</h2>
             <p>Перейдите по ссылке в этом письме, если согласны получать уведомления об интересующих Вас мероприятиях платформы от команды <strong>Zero-Cost Developers</strong>:</p>
             <p style="text-align: center; margin: 20px 0;">
-                <a href="https://localhost:5173/confirm/%s" 
+                <a href="https://localhost:5173/confirm/%s"
                    style="display: inline-block; padding: 12px 20px; color: #fff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Подтвердить</a>
             </p>
             <p style="color: #777;">Если вы не запрашивали это письмо, просто проигнорируйте его.</p>
