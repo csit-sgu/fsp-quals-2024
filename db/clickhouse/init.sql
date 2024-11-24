@@ -83,11 +83,11 @@ add column event_scale String default (
 );
 
 CREATE TABLE db.subscriptions (
-    confirmation UUID NOT NULL,
-    email String NOT NULL,
-    is_active Boolean NOT NULL,
+    confirmation UUID,
+    email String,
+    is_active Boolean,
     code String,
-    gender Enum('male' = 1, 'female' = 2),
+    gender Enum('' = 0, 'male' = 1, 'female' = 2),
     age UInt32,
     sport String,
     additional_info String,
