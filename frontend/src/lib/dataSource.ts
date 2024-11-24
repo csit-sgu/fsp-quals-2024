@@ -4,6 +4,7 @@ import { toCapitalCase } from './utils'
 export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'localhost:3000'
 
 export type Condition = {
+  title?: string,
   additional_info?: string
   age?: number
   code?: string
@@ -51,10 +52,29 @@ type FilterResult = {
   total: number
 }
 
-// axios.interceptors.request.use(request => {
-//   console.log('Starting Request', JSON.stringify(request, null, 2))
-//   return request
-// })
+export const typeMap = new Map<string, string>([
+  ['Соревнование', "competitions"],
+  ['Чемпионат', "championship"],
+  ['Первенство', "first"],
+  ['Кубок', "cup"],
+  ['Событие', "event"],
+  ['Другое', "unknown"],
+  ['Олимпийское', "olympics"],
+  ['Игры', "games"],
+  ['Турнир', "tournament"],
+])
+
+export const scaleMap = new Map<string, string>([
+  ['Федеральный', "federal"],
+  ['Региональный', "regional"],
+  ['Международный', "international"],
+  ['Междурегионный', "interregional"],
+])
+
+axios.interceptors.request.use(request => {
+  console.log('Starting Request', JSON.stringify(request, null, 2))
+  return request
+})
 
 export type SubscriptionRequest = {
   additional_info?: string

@@ -14,7 +14,6 @@ const props = defineProps<{
   events: Competition[],
 }>()
 const events = props.events
-console.log(events.map((e) => e.age_data))
 </script>
 
 <template>
@@ -93,5 +92,5 @@ console.log(events.map((e) => e.age_data))
       </TableRow>
     </TableBody>
   </Table>
-  <span v-if="events.length == 0" class="text-xl text-center p-16">Ничего не найдено</span>
+  <span v-if="!events || events.length == 0" class="text-xl text-center p-16">Ничего не найдено</span>
 </template>
