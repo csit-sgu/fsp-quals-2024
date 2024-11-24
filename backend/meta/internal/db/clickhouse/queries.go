@@ -23,16 +23,25 @@ with country_view as (
 age_view as (
     select distinct left_bound, right_bound, gender, code, extra_mapping from db.age_restrictions %s
 ),
-ordered as (
-	select distinct code, row_number() over (order by start_date desc) as page_index, start_date, title, additional_info, event_type, event_scale, n_participants, end_date, sport
-	from db.events %s
-	order by start_date desc
+common_view as (
+        select distinct code, start_date, title, additional_info, event_type, event_scale, n_participants, end_date, sport
+        from db.events %s
+        order by start_date desc
+),
+merged as (
+	select o.code as code,start_date,country,region,locality,gender,left_bound,right_bound,title,additional_info,n_participants,end_date,sport,extra_mapping,event_type,event_scale
+	from common_view o
+	inner join country_view cv on cv.code = o.code
+	inner join age_view av on av.code = o.code
+),
+paginated as (
+	select code, start_date as d, (dense_rank() over (order by start_date desc)) as page_index from merged group by code, start_date order by d desc
+),
+selected as (
+	select code, page_index from paginated p %s
 )
-select %s
-from ordered o
-inner join country_view cv on cv.code = o.code
-inner join age_view av on av.code = o.code %s
-order by page_index asc
+select %s from merged
+inner join selected using (code)
 `
 
 const filterCounterQuery = `
@@ -58,7 +67,7 @@ select count() as count from available;
 `
 
 const codeQuery = `
-SELECT code, title, additional_info FROM db.events WHERE code in (@codes)
+SELECT code, title, additional_info FROM db.events
 `
 
 const subFindByMail = `

@@ -53,17 +53,21 @@ func (c *OpenSearch) IndexData(
 			DocumentID: indexData[i].Code,
 		}
 
-		_, err := req.Do(ctx, c.Client)
+
+		resp, err := req.Do(ctx, c.Client)
+
 		if err != nil {
-			log.S.Error(
+			log.S.Warn(
 				"Failed to index data",
 				log.L().
 					Add("index", c.Index).
 					Add("code", indexData[i].Code).
 					Error(err),
 			)
-			return err
+            continue
 		}
+
+        resp.Body.Close()
 	}
 
 	log.S.Debug("Index request was completed", l)

@@ -13,7 +13,6 @@ import (
 )
 
 var viewFields = [...]string{
-	"o.code",
 	"start_date",
 	"country",
 	"region",
@@ -27,9 +26,9 @@ var viewFields = [...]string{
 	"end_date",
 	"sport",
 	"extra_mapping",
-	"page_index",
-    "event_type",
-    "event_scale",
+	"event_type",
+	"event_scale",
+    "code",
 }
 
 func (c ClickhouseClient) getAgeRestrictionQuery(
@@ -57,7 +56,7 @@ func (c ClickhouseClient) buildPart(
 				chTag,
 				chTag,
 			), []any{
-				clickhouse.Named(chTag,fieldValue.Interface()),
+				clickhouse.Named(chTag, fieldValue.Interface()),
 			}
 	case "interval":
 		return fmt.Sprintf(
@@ -75,7 +74,7 @@ func (c ClickhouseClient) buildPart(
 				chTag,
 				chTag,
 			), []any{
-                clickhouse.Named(chTag, fieldValue.Interface()),
+				clickhouse.Named(chTag, fieldValue.Interface()),
 			}
 	}
 	return part, namedFields
@@ -177,8 +176,8 @@ func (c ClickhouseClient) BuildFilterQuery(
 		locationWhere,
 		ageWhere,
 		commonWhere,
-		selectPart,
 		paginationPart,
+		selectPart,
 	)
 	log.S.Debug("Built filter query", log.L().Add("query", query).Add("namedFields", namedFields))
 
@@ -195,7 +194,6 @@ func (c ClickhouseClient) BuildFilterQuery(
 func (c ClickhouseClient) GetIndexData(
 	ctx context.Context,
 	l log.LogObject,
-	request model.NotifyRequest,
 ) (indexData []model.IndexData, err error) {
 	query := codeQuery
 

@@ -41,7 +41,7 @@ type Pagination struct {
 }
 
 type FilterCondition struct {
-	Code           string    `json:"code"            filter:"common"   ch:"o.code"`
+	Code           string    `json:"code"            filter:"common"   ch:"code"`
 	Gender         string    `json:"gender"          filter:"common"   ch:"gender"`
 	Age            uint32    `json:"age"             filter:"inside"   ch:"age"`
 	Sport          string    `json:"sport"           filter:"common"   ch:"sport"`

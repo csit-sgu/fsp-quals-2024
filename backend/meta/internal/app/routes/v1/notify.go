@@ -22,7 +22,6 @@ import (
 //	@router		/notify [POST]
 func Notify(c *gin.Context) {
 	traceId := c.GetString("trace_id")
-	ctx := c.Request.Context()
 	l := log.L().TraceId(traceId)
 
 	r := model.NotifyRequest{}
@@ -34,9 +33,9 @@ func Notify(c *gin.Context) {
 
 	log.S.Debug("Query parameters were validated successful", l.Add("cond", r))
 
-	data, err := appcontext.Ctx.Clickhouse.GetIndexData(ctx, l, r)
+	data, err := appcontext.Ctx.Clickhouse.GetIndexData(c, l)
 
-	err = appcontext.Ctx.OpenSearch.IndexData(ctx, l, data)
+	err = appcontext.Ctx.OpenSearch.IndexData(c, l, data)
 	if err != nil {
 		log.S.Error("Failed to index data", l.Error(err))
 		_ = c.Error(err).SetType(gin.ErrorTypePublic)

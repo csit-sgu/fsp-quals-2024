@@ -2,6 +2,7 @@ package opensearch
 
 import (
 	"app/internal/config"
+	"fmt"
 
 	"github.com/opensearch-project/opensearch-go"
 )
@@ -11,7 +12,7 @@ func InitOpenSearchClient(
 ) (*opensearch.Client, error) {
 	return opensearch.NewClient(opensearch.Config{
 		Addresses: []string{
-			c.Host,
+            fmt.Sprintf("http://%s:%s", c.Host, c.Port),
 		},
 		Username: c.Username,
 		Password: c.Password,

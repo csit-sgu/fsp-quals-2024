@@ -16,7 +16,7 @@ type AgeData struct {
 }
 
 type EventView struct {
-	Code           string    `json:"code"            ch:"o.code"`
+	Code           string    `json:"code"            ch:"code"`
 	StartDate      time.Time `json:"start_date"      ch:"start_date"`
 	Country        string    `json:"country"         ch:"country"`
 	Region         string    `json:"region"          ch:"region"`
