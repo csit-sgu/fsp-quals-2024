@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import type { SubscriptionRequest } from '@/lib/dataSource'
+import type { Condition, SubscriptionRequest } from '@/lib/dataSource'
 import { BACKEND_URL } from '@/lib/dataSource'
 import { ref } from 'vue'
 import { toast } from 'vue-sonner'
@@ -18,7 +18,7 @@ import axios from 'axios'
 import type { AxiosResponse } from 'axios'
 
 const props = defineProps<{
-  searchFilters: string[]
+  searchFilters: Condition
 }>()
 
 const userEmail = ref('')
@@ -55,14 +55,11 @@ const applyForSubscription = () => {
     <DialogTrigger as-child>
       <Button variant="outline">Подписаться на уведомления</Button>
     </DialogTrigger>
-    <DialogContent
-      @interact-outside="
-        (event) => {
-          const target = event.target as HTMLElement
-          if (target?.closest('[data-sonner-toaster]')) return event.preventDefault()
-        }
-      "
-    >
+    <DialogContent @interact-outside="(event) => {
+      const target = event.target as HTMLElement
+      if (target?.closest('[data-sonner-toaster]')) return event.preventDefault()
+    }
+      ">
       <DialogHeader class="px-4 pt-3 pb-1">
         <DialogTitle class="text-2xl">Подписаться на уведомления</DialogTitle>
         <DialogDescription>
@@ -72,13 +69,38 @@ const applyForSubscription = () => {
         <div class="flex flex-col">
           <div class="font-semibold">Выбранные параметры фильтров:</div>
           <!-- TODO(aguschin): we need better conditions for filters' existence -->
-          <div
-            v-if="props.searchFilters.filter((x) => x.trim()).length > 0"
-            v-for="filterString in props.searchFilters"
-          >
-            {{ filterString }}
+          <div v-if="props.searchFilters.title">
+            Название соревнования: {{ props.searchFilters.title }}
           </div>
-          <div v-else>Не указано ни одного фильтра</div>
+          <div v-if="props.searchFilters.sport">
+            Вид спорта: {{ props.searchFilters.sport }}
+          </div>
+          <div v-if="props.searchFilters.country">
+            Страна: {{ props.searchFilters.country }}
+          </div>
+          <div v-if="props.searchFilters.region">
+            Регион: {{ props.searchFilters.region }}
+          </div>
+          <div v-if="props.searchFilters.locality">
+            Населённый пункт: {{ props.searchFilters.locality }}
+          </div>
+          <div v-if="props.searchFilters.age">
+            Возраст: {{ props.searchFilters.age }}
+          </div>
+          <div v-if="props.searchFilters.gender">
+            Пол: {{ props.searchFilters.gender }}
+          </div>
+          <div v-if="props.searchFilters.event_type">
+            Тип события: {{ props.searchFilters.event_type }}
+          </div>
+          <div v-if="props.searchFilters.event_scale">
+            Уровень соревнования: {{ props.searchFilters.event_scale }}
+          </div>
+          <div v-if="props.searchFilters.additional_info && props.searchFilters.additional_info.length > 0">
+            Дополнительная информация: {{ props.searchFilters.additional_info }}
+          </div>
+
+          <!-- <div v-else>Не указано ни одного фильтра</div> -->
 
           <div class="font-semibold">Им соответствует {{ 1337 }} соревнований</div>
         </div>

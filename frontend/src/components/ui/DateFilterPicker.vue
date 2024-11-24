@@ -19,15 +19,16 @@ import { cn } from '@/lib/utils'
 import { Check, ChevronsUpDown } from 'lucide-vue-next'
 
 const options = new Map([
-  ['Ближайшая неделя', '/weekly'],
-  ['Ближайший месяц', '/table'],
-  ['Ближайший квартал', '/table'],
-  ['Ближайшие полгода', '/table'],
-  ['Указать вручную', '/table'],
+  ['Ближайшая неделя', ['/weekly', 'week']],
+  ['Ближайший месяц', ['/table', 'month']],
+  ['Ближайший квартал', ['/table', 'quarter']],
+  ['Ближайшие полгода', ['/table', 'half']],
+  ['Указать вручную', ['/table', 'custom']],
 ])
 
 const emit = defineEmits<{
-  (e: 'update', value: string): void
+  (e: 'update', path: string, value: string): void
+  (e: 'calendarUpdate', range: DateRange): void
 }>()
 
 const value = ref('')
@@ -40,11 +41,7 @@ const calendarPickedRange = ref({
   end: startDate.add({ days: 20 }),
 }) as Ref<DateRange>
 
-const calendarUpdated = (range: DateRange) => {
-  if (!range.start || !range.end) {
-    return
-  }
-}
+const calendarUpdated = (range: DateRange) => emit('calendarUpdate', range)
 
 const MAX_LENGTH = 21
 
@@ -66,7 +63,7 @@ const MAX_LENGTH = 21
             <CommandItem v-for="option in options" :value="option" @select="(ev) => {
               if (typeof ev.detail.value === 'object') {
                 value = ev.detail.value[0]
-                emit('update', ev.detail.value[1])
+                emit('update', ev.detail.value[1][0], ev.detail.value[1][1])
               }
               console.log(typeof ev.detail.value)
               open = false
