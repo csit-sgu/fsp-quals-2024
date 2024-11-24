@@ -53,7 +53,7 @@ const router = useRouter()
 const getPageSize = () => route.path == '/weekly' ? 10 : 25
 
 const viewMode = ref('')
-const calendarRange = ref(null)
+const calendarRange: Ref<any> = ref(null)
 
 const pickedSport = ref('')
 
@@ -76,6 +76,7 @@ const event_scale = ref('')
 const updateViewMode = (path: string, value: string) => {
   router.push(path)
   viewMode.value = value
+  updateEvents(0)
 }
 
 const updateCountry = async (newValue: string) => {
@@ -117,7 +118,7 @@ const getFilters = (): Condition => {
   const date_range = () => {
     const from = dayjs.utc().format('YYYY-MM-DD')
     if (viewMode.value === 'week') {
-      return { from, to: dayjs.utc().add(1, 'week').format('YYYY-MM-DD') }
+      return { from, to: dayjs.utc().add(6, 'day').format('YYYY-MM-DD') }
     }
     if (viewMode.value === 'month') {
       return { from, to: dayjs.utc().add(1, 'month').format('YYYY-MM-DD') }
@@ -128,8 +129,8 @@ const getFilters = (): Condition => {
     if (viewMode.value === 'half') {
       return { from, to: dayjs.utc().add(6, 'month').format('YYYY-MM-DD') }
     }
-    if (viewMode.value === 'custom' && calendarRange.value) {
-      return { from: calendarRange.value.start, to: calendarRange.value.end }
+    if (viewMode.value === 'custom' && calendarRange.value && calendarRange.value.start && calendarRange.value.end) {
+      return { from: calendarRange.value.start.toString(), to: calendarRange.value.end.toString() }
     }
   }
 
@@ -229,7 +230,8 @@ const getFilters = (): Condition => {
         </div>
       </header>
       <WeeklyView :key="eventsWithCount.count" :events="eventsWithCount.events" v-if="route.path === '/weekly'" />
-      <TableView :key="eventsWithCount.count" :events="eventsWithCount.events" v-if="route.path === '/table'" />
+      <TableView :key="eventsWithCount.count" :events="eventsWithCount.events"
+        v-if="route.path === '/' || route.path === '/table'" />
       <Pagination :key="total_items" v-if="eventsWithCount.events && eventsWithCount.events.length > 0"
         v-slot="{ page }" :itemsPerPage="getPageSize()" :total="total_items - getPageSize()" :sibling-count="1"
         show-edges :default-page="1" class="self-center p-16">
