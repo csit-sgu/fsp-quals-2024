@@ -17,5 +17,3 @@ RUN npm run build
 # copy production dependencies and source code into final image
 FROM nginx:stable-alpine AS release
 COPY --from=prerelease /build/dist /usr/share/nginx/html/
-EXPOSE 80/tcp
-EXPOSE 443/tcp
