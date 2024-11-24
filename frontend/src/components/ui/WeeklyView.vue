@@ -19,22 +19,24 @@ dayjs.extend(utc)
 
 const weekdays = ['Понедельник', 'Вторник', 'Среда', 'Четверг', 'Пятница', 'Суббота', 'Воскресенье']
 
-const today = dayjs.utc(props.beginDay).set('hour', 13) || dayjs.utc().set('hour', 13)
+const today =
+  dayjs.utc(props.beginDay).set('h', 13).set('m', 0).set('s', 0) ||
+  dayjs.utc().set('h', 13).set('m', 0).set('s', 0)
 const beginWeek = today.isoWeekday() - 1
 
 const renderEvents = events
   .map((event) => {
-    const start = dayjs(event.start_date)
-    const end = dayjs(event.end_date)
-    const startDiffToday = Math.round(start.diff(today, 'day', true)) + 1
-    const endDiffToday = Math.round(end.diff(today, 'day', true)) + 1
-    if (startDiffToday > weekdays.length || endDiffToday < 0) {
+    const start = dayjs.utc(event.start_date).set('h', 13).set('m', 0).set('s', 0)
+    const end = dayjs.utc(event.end_date).set('h', 13).set('m', 0).set('s', 0)
+    const startDiffToday = (start.unix() - today.unix()) / (60 * 60 * 24)
+    const endDiffToday = (end.unix() - today.unix()) / (60 * 60 * 24)
+    if (startDiffToday >= weekdays.length || endDiffToday < 0) {
       return null
     }
 
     const headDays = Math.max(0, startDiffToday)
     const renderDuration =
-      endDiffToday > weekdays.length ? weekdays.length - headDays : endDiffToday - headDays + 1
+      endDiffToday >= weekdays.length ? weekdays.length - headDays : endDiffToday - headDays + 1
     const tailDays = weekdays.length - renderDuration - headDays
 
     return {
