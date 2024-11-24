@@ -1,3 +1,4 @@
 db/clickhouse/data
+db/opensearch/data
 .DS_Store
 tmp/

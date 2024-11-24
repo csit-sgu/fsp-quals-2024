@@ -1,6 +1,7 @@
 name: fsp-hack
 services:
   clickhouse:
+    container_name: ${COMPOSE_PROJECT_NAME}-ch
     image: clickhouse/clickhouse-server:24.10
     environment:
       - CLICKHOUSE_DB=${CLICKHOUSE_DB:-db}
@@ -27,12 +28,9 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
----
-version: '3'
-services:
   opensearch:
     image: opensearchproject/opensearch:latest
-    container_name: opensearch
+    container_name: ${COMPOSE_PROJECT_NAME}-os
     environment:
       - cluster.name=opensearch-cluster
       - node.name=opensearch
@@ -49,26 +47,53 @@ services:
         soft: 65536  # maximum number of open files for the OpenSearch user, set to at least 65536 on modern systems
         hard: 65536
     volumes:
-      - opensearch-data:/usr/share/opensearch/data
+      - ./db/opensearch/data:/usr/share/opensearch/data
     ports:
       - 9200:9200
       - 9600:9600  # required for Performance Analyzer
-    networks:
-      - opensearch-net
+
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
-    container_name: opensearch-dashboards
+    container_name: ${COMPOSE_PROJECT_NAME}-osd
     ports:
       - 5601:5601
     expose:
       - '5601'
     environment:
       OPENSEARCH_HOSTS: '["https://opensearch:9200"]'
-    networks:
-      - opensearch-net
 
-volumes:
-  opensearch-data:
+  parser:
+    image: parser:latest
+    pull_policy: never
+    container_name: ${COMPOSE_PROJECT_NAME}-parser
+    build:
+      context: ../backend/parser
+      dockerfile: Dockerfile
+    restart: on-failure
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    environment:
+      PARSER_REMOTE_FILE: https://storage.minsport.gov.ru/cms-uploads/cms/II_chast_EKP_2024_14_11_24_65c6deea36.pdf
+      PARSER_CH_USER: ${CLICKHOUSE_USER:-user}
+      PARSER_CH_PASSWORD: ${CLICKHOUSE_PASSWORD:-12345}
+      PARSER_CH_HOST: clickhouse
+      PARSER_CH_PORT: 9000
+      PARSER_META_HOST: meta
+      PARSER_LOG_LEVEL: DEBUG
+      PARSER_NO_DOWNLOAD: false
+      PARSER_UNLOAD_TIMEOUT: 300
 
-networks:
-  opensearch-net:
+  meta:
+    image: meta:latest
+    pull_policy: never
+    container_name: ${COMPOSE_PROJECT_NAME}-meta
+    build:
+      context: ../backend/meta
+      dockerfile: Dockerfile
+    restart: on-failure
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+    environment:
+      CONFIG_FILE: config/config.yaml
