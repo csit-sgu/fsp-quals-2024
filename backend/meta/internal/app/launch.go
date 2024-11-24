@@ -67,7 +67,6 @@ func Launch() {
 		v1Group.GET("/sports", v1.GetSports)
 		v1Group.POST("/subscription", v1.PostSubscription)
 		v1Group.POST("/subscription/confirm", v1.ConfirmSubscription)
-		v1Group.POST("/notify", v1.Notify)
 	}
 
 	if config.C.EnablePprof {

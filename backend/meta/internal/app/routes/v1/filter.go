@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"app/internal/app/appcontext"
-	"app/internal/db/opensearch"
 	"app/internal/log"
 	"app/internal/model"
 
@@ -41,14 +40,6 @@ func FilterData(c *gin.Context) {
 		ctx,
 		l,
 		r,
-	)
-
-	resp.Events, err = opensearch.ApplyFuzzySearch(
-		ctx,
-		l,
-		r.Condition.Title,
-		r.Condition.AdditionalInfo,
-		resp.Events,
 	)
 
 	if err != nil {
