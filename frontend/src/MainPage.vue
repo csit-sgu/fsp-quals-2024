@@ -9,7 +9,7 @@ import {
   PaginationLast,
   PaginationNext,
   PaginationPrev,
-  PaginationEllipsis
+  PaginationEllipsis,
 } from '@/components/ui/pagination'
 import {
   Sidebar,
@@ -20,13 +20,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from '@/components/ui/sidebar'
-import {
-  WeeklyView,
-  DateFilterPicker,
-  Chooser,
-  TableView,
-  SubscribeDialog
-} from '@/components/ui'
+import { WeeklyView, DateFilterPicker, Chooser, TableView, SubscribeDialog } from '@/components/ui'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { onMounted, ref, type Ref } from 'vue'
@@ -41,7 +35,7 @@ import {
   getRegions,
   getLocalities,
   countryHasRegions,
-  type Condition
+  type Condition,
 } from '@/lib/dataSource'
 import SidebarFooter from './components/ui/sidebar/SidebarFooter.vue'
 import { type Competition, getEvents } from '@/lib/dataSource'
@@ -50,7 +44,7 @@ import { Toaster } from '@/components/ui/sonner'
 const route = useRoute()
 const router = useRouter()
 
-const getPageSize = () => route.path == '/weekly' ? 10 : 25
+const getPageSize = () => (route.path == '/weekly' ? 10 : 25)
 
 const viewMode = ref('')
 const calendarRange: Ref<any> = ref(null)
@@ -98,7 +92,7 @@ const updateRegion = async (newValue: string) => {
 }
 
 const eventsWithCount: Ref<{
-  events: Competition[],
+  events: Competition[]
   count: number
 }> = ref({ events: [], count: 0 })
 const total_items: Ref<number> = ref(1)
@@ -129,7 +123,12 @@ const getFilters = (): Condition => {
     if (viewMode.value === 'half') {
       return { from, to: dayjs.utc().add(6, 'month').format('YYYY-MM-DD') }
     }
-    if (viewMode.value === 'custom' && calendarRange.value && calendarRange.value.start && calendarRange.value.end) {
+    if (
+      viewMode.value === 'custom' &&
+      calendarRange.value &&
+      calendarRange.value.start &&
+      calendarRange.value.end
+    ) {
       return { from: calendarRange.value.start.toString(), to: calendarRange.value.end.toString() }
     }
   }
@@ -168,50 +167,104 @@ const getFilters = (): Condition => {
           <SidebarGroup class="content-center px-4 w-auto">
             <h1 class="text-2xl font-extrabold px-2 py-4">Поиск соревнований</h1>
             <SidebarGroupLabel class="pt-4 pb-6">Фильтрация по дате</SidebarGroupLabel>
-            <DateFilterPicker @update="updateViewMode" @calendarUpdate="(range: any) => { calendarRange = range }" />
+            <DateFilterPicker
+              @update="updateViewMode"
+              @calendarUpdate="
+                (range: any) => {
+                  calendarRange = range
+                }
+              "
+            />
 
             <SidebarGroupLabel class="pt-8 pb-6">Фильтрация по месту проведения</SidebarGroupLabel>
-            <Chooser :options="countries" :show-search="true" default-msg="Любая страна" @update="updateCountry" />
+            <Chooser
+              :options="countries"
+              :show-search="true"
+              default-msg="Любая страна"
+              @update="updateCountry"
+            />
             <div v-if="countryHasRegions(pickedCountry)" class="pb-2" />
-            <Chooser v-if="countryHasRegions(pickedCountry)" :show-search="true" :options="pickedCountryRegions"
-              default-msg="Любой регион" @update="updateRegion" />
+            <Chooser
+              v-if="countryHasRegions(pickedCountry)"
+              :show-search="true"
+              :options="pickedCountryRegions"
+              default-msg="Любой регион"
+              @update="updateRegion"
+            />
             <div class="pt-2" />
-            <Chooser v-if="
-              pickedRegion.length > 0 ||
-              (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
-            " :show-search="true" :options="pickedRegionLocalities" default-msg="Любой населённый пункт"
-              @update="(newValue: string) => (pickedLocality = newValue)" />
+            <Chooser
+              v-if="
+                pickedRegion.length > 0 ||
+                (!countryHasRegions(pickedCountry) && pickedCountry.length > 0)
+              "
+              :show-search="true"
+              :options="pickedRegionLocalities"
+              default-msg="Любой населённый пункт"
+              @update="(newValue: string) => (pickedLocality = newValue)"
+            />
 
             <SidebarGroupLabel class="pt-6 pb-6">Фильтрация по соревнованиям</SidebarGroupLabel>
-            <Chooser :options="sports" :show-search="true" default-msg="Любой вид спорта"
-              @update="(newValue: string) => (pickedSport = newValue)" />
+            <Chooser
+              :options="sports"
+              :show-search="true"
+              default-msg="Любой вид спорта"
+              @update="(newValue: string) => (pickedSport = newValue)"
+            />
             <div class="pt-2">
-              <Input @update:model-value="(newValue: string | number) => (discipline = newValue.toString())"
-                type="search" placeholder="Поиск по дисциплине..." />
+              <Input
+                @update:model-value="
+                  (newValue: string | number) => (discipline = newValue.toString())
+                "
+                type="search"
+                placeholder="Поиск по дисциплине..."
+              />
             </div>
             <div class="pt-2">
-              <Chooser :options="[...typeMap.keys()]" :show-search="true" default-msg="Любой тип соревнования"
-                @update="(newValue: string) => (event_type = String(newValue))" />
+              <Chooser
+                :options="[...typeMap.keys()]"
+                :show-search="true"
+                default-msg="Любой тип соревнования"
+                @update="(newValue: string) => (event_type = String(newValue))"
+              />
             </div>
             <div class="pt-2">
-              <Chooser :options="[...scaleMap.keys()]" default-msg="Любой уровень соревнования"
-                @update="(newValue: string) => (event_scale = String(newValue))" />
+              <Chooser
+                :options="[...scaleMap.keys()]"
+                default-msg="Любой уровень соревнования"
+                @update="(newValue: string) => (event_scale = String(newValue))"
+              />
             </div>
             <div class="pt-2">
-              <Input @update:model-value="(newValue: string | number) => (title = newValue.toString())" type="search"
-                placeholder="Поиск по названию..." />
+              <Input
+                @update:model-value="(newValue: string | number) => (title = newValue.toString())"
+                type="search"
+                placeholder="Поиск по названию..."
+              />
             </div>
             <div class="pt-2">
-              <Input @update:model-value="(newValue: string | number) => (additionalInfo = String(newValue))"
-                type="search" placeholder="Поиск по другой информации..." />
+              <Input
+                @update:model-value="
+                  (newValue: string | number) => (additionalInfo = String(newValue))
+                "
+                type="search"
+                placeholder="Поиск по другой информации..."
+              />
             </div>
 
-            <SidebarGroupLabel class="pt-10 pb-8">Фильтрация по информации о спортсмене</SidebarGroupLabel>
-            <Chooser :options="['Мужской', 'Женский']" default-msg="Любой пол"
-              @update="(newValue: string) => (gender = String(newValue))" />
+            <SidebarGroupLabel class="pt-10 pb-8"
+              >Фильтрация по информации о спортсмене</SidebarGroupLabel
+            >
+            <Chooser
+              :options="['Мужской', 'Женский']"
+              default-msg="Любой пол"
+              @update="(newValue: string) => (gender = String(newValue))"
+            />
             <div class="pt-2">
-              <Input @update:model-value="(newValue: string | number) => (age = Number(newValue))" type="number"
-                placeholder="Любой возраст..." />
+              <Input
+                @update:model-value="(newValue: string | number) => (age = Number(newValue))"
+                type="number"
+                placeholder="Любой возраст..."
+              />
             </div>
           </SidebarGroup>
         </ScrollArea>
@@ -223,26 +276,50 @@ const getFilters = (): Condition => {
     </Sidebar>
     <SidebarInset class="min-h-screen overflow-x-hidden">
       <header
-        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        class="flex w-full h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12"
+      >
         <div class="flex items-center gap-2 px-4">
           <SidebarTrigger class="-ml-1" />
           <Separator orientation="vertical" class="mr-2 h-4" />
         </div>
       </header>
-      <WeeklyView :key="eventsWithCount.count" :events="eventsWithCount.events" v-if="route.path === '/weekly'" />
-      <TableView :key="eventsWithCount.count" :events="eventsWithCount.events"
-        v-if="route.path === '/' || route.path === '/table'" />
-      <Pagination :key="total_items" v-if="eventsWithCount.events && eventsWithCount.events.length > 0"
-        v-slot="{ page }" :itemsPerPage="getPageSize()" :total="total_items - getPageSize()" :sibling-count="1"
-        show-edges :default-page="1" class="self-center p-16">
+      <WeeklyView
+        :key="eventsWithCount.count"
+        :events="eventsWithCount.events"
+        v-if="route.path === '/weekly'"
+      />
+      <TableView
+        :key="eventsWithCount.count"
+        :events="eventsWithCount.events"
+        v-if="route.path === '/' || route.path === '/table'"
+      />
+      <Pagination
+        :key="total_items"
+        v-if="eventsWithCount.events && eventsWithCount.events.length > 0"
+        v-slot="{ page }"
+        :itemsPerPage="getPageSize()"
+        :total="total_items - getPageSize()"
+        :sibling-count="1"
+        show-edges
+        :default-page="1"
+        class="self-center p-16"
+      >
         <PaginationList v-slot="{ items }" class="flex items-center gap-1">
           <PaginationFirst />
           <PaginationPrev />
 
           <template v-for="(item, index) in items">
-            <PaginationListItem v-if="item.type === 'page'" :key="index" :value="item.value" as-child>
-              <Button class="w-10 h-10 p-0" :variant="item.value === page ? 'default' : 'outline'"
-                @click="updateEvents(item.value)">
+            <PaginationListItem
+              v-if="item.type === 'page'"
+              :key="index"
+              :value="item.value"
+              as-child
+            >
+              <Button
+                class="w-10 h-10 p-0"
+                :variant="item.value === page ? 'default' : 'outline'"
+                @click="updateEvents(item.value)"
+              >
                 {{ item.value }}
               </Button>
             </PaginationListItem>
@@ -256,7 +333,6 @@ const getFilters = (): Condition => {
         <div class="pt-4 color-red-500 text-center">
           Всего найдено соревнований: {{ total_items }}
         </div>
-
       </Pagination>
     </SidebarInset>
   </SidebarProvider>
