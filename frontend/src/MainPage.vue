@@ -34,7 +34,7 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import dayjs from 'dayjs'
 import isoWeek from 'dayjs/plugin/isoWeek'
 import utc from 'dayjs/plugin/utc'
-import { scaleMap, typeMap } from '@/lib/dataSource'
+import { scaleMap, sexMap, typeMap } from '@/lib/dataSource'
 import {
   sports,
   countries,
@@ -128,7 +128,7 @@ const getFilters = (): Condition => {
     if (viewMode.value === 'half') {
       return { from, to: dayjs.utc().add(6, 'month').format('YYYY-MM-DD') }
     }
-    if (viewMode.value === 'custom') {
+    if (viewMode.value === 'custom' && calendarRange.value) {
       return { from: calendarRange.value.start, to: calendarRange.value.end }
     }
   }
@@ -136,24 +136,22 @@ const getFilters = (): Condition => {
   const additional_info = () => {
     let s = ''
     s += discipline.value
-    s += ' '
+    s += '|'
     s += additionalInfo.value
     return s.trim()
   }
 
-  console.log(date_range())
-
   return {
     title: title.value,
     additional_info: additional_info(),
-    sport: pickedSport.value,
+    sport: pickedSport.value.toUpperCase(),
     age: age.value,
     // code?: string, // NOTE(mchernigin): not used for filters
     country: pickedCountry.value,
     region: pickedRegion.value,
     locality: pickedLocality.value,
     date_range: date_range(),
-    gender: gender.value,
+    gender: sexMap.get(gender.value),
     event_type: typeMap.get(event_type.value),
     event_scale: scaleMap.get(event_scale.value),
   }
@@ -208,7 +206,7 @@ const getFilters = (): Condition => {
             </div>
 
             <SidebarGroupLabel class="pt-10 pb-8">Фильтрация по информации о спортсмене</SidebarGroupLabel>
-            <Chooser :options="['Мужчина', 'Женщина']" default-msg="Любой пол"
+            <Chooser :options="['Мужской', 'Женский']" default-msg="Любой пол"
               @update="(newValue: string) => (gender = String(newValue))" />
             <div class="pt-2">
               <Input @update:model-value="(newValue: string | number) => (age = Number(newValue))" type="number"
@@ -233,8 +231,8 @@ const getFilters = (): Condition => {
       <WeeklyView :key="eventsWithCount.count" :events="eventsWithCount.events" v-if="route.path === '/weekly'" />
       <TableView :key="eventsWithCount.count" :events="eventsWithCount.events" v-if="route.path === '/table'" />
       <Pagination :key="total_items" v-if="eventsWithCount.events && eventsWithCount.events.length > 0"
-        v-slot="{ page }" :itemsPerPage="getPageSize()" :total="total_items" :sibling-count="1" show-edges
-        :default-page="1" class="self-center p-16">
+        v-slot="{ page }" :itemsPerPage="getPageSize()" :total="total_items - getPageSize()" :sibling-count="1"
+        show-edges :default-page="1" class="self-center p-16">
         <PaginationList v-slot="{ items }" class="flex items-center gap-1">
           <PaginationFirst />
           <PaginationPrev />
