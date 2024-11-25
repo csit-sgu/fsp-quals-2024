@@ -112,9 +112,10 @@ func Launch() {
 	}
 
 	// perform startup logic
-	err = onStartup(ctx)
+	_ = onStartup(ctx)
 
-	if err == nil {
+    // NOTE(evgenymng): When OpenSearch crashes, ignore it
+	if true {
 		// server runs in a goroutine
 		go func() {
 			if err := srv.Serve(listener); err != nil &&
