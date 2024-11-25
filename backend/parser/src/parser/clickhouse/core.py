@@ -38,9 +38,9 @@ class ClickHouse:
         upd_events = []
         for _, row in upd_codes.iterrows():
             if (
-                row["End Date New"].tz_localize(None) != row["End Date Old"]
-                or row["Start Date New"].tz_localize(None)
-                != row["Start Date Old"]
+                row["End Date New"].date() != row["End Date Old"].date()
+                or row["Start Date New"].date()
+                != row["Start Date Old"].date()
             ):
                 upd_events.append(row["Code"])
 
