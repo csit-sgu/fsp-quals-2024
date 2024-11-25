@@ -1,4 +1,4 @@
-FROM python:3.11-alpine3.20 AS runtime
+FROM python:3.11-alpine3.20 AS builder
 
 ARG WD_NAME=/app
 WORKDIR $WD_NAME
@@ -17,6 +17,13 @@ COPY uv.lock .
 COPY .python-version .
 RUN uv sync --frozen --no-dev
 
+FROM python:3.11-alpine3.20 AS runtime
+
+ARG WD_NAME=/app
+WORKDIR $WD_NAME
+
+ENV PYTHONPATH="src:.venv/lib/python3.11/site-packages"
+COPY --from=builder $WD_NAME/.venv .venv
 COPY src src
 
-ENTRYPOINT ["uv", "run", "--frozen", "launch"]
+ENTRYPOINT ["python", "-c", "from parser.main import main; main()"]
