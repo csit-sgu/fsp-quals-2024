@@ -95,7 +95,11 @@ func onStartup(ctx context.Context) error {
 	}.Do(ctx, osClient)
 
 	bodyBytes := new(bytes.Buffer)
-	bodyBytes.ReadFrom(resp.Body)
+    _, err = bodyBytes.ReadFrom(resp.Body)
+    if err != nil {
+        log.S.Error("Failed to create OpenSearch index", log.L().Error(err))
+		return err
+    }
 	log.S.Debug("resp", log.L().Add("body", bodyBytes.String()))
 
 	if err != nil {
